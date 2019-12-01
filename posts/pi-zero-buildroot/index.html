@@ -7,11 +7,13 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <title>Pi Zero Buildroot - Option::&lt;Title&gt;::None</title><script type="application/ld+json">
+  <title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1) - Option::None</title>
+  <meta name="description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.
+개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop!"><script type="application/ld+json">
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
-    "name": "Option::\x3cTitle\x3e::None",
+    "name": "Option::None",
     
     "url": "http:\/\/blog.cro.sh\/"
 }
@@ -43,7 +45,7 @@
         "position": 3,
         "item": {
           "@id": "http:\/\/blog.cro.sh\/posts\/pi-zero-buildroot\/",
-          "name": "Pi zero buildroot"
+          "name": "Raspberry pi zero w에 buildroot 설치하기 (1)"
         }
     }]
 }
@@ -54,10 +56,10 @@
   "author": {
     "name" : ""
   },
-  "headline": "Pi Zero Buildroot",
-  "description" : "",
+  "headline": "Raspberry Pi Zero-W에 Buildroot 설치하기 (1)",
+  "description" : "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 \x26lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까\x26rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n개발 환경  빌드 장치: Dell XPS 9550 CPU\/RAM: Intel Core i7-6700HQ\/8GB OS: Pop!",
   "inLanguage" : "en",
-  "wordCount":  0 ,
+  "wordCount":  679 ,
   "datePublished" : "2019-12-01T19:19:27",
   "dateModified" : "2019-12-01T19:19:27",
   "image" : "http:\/\/blog.cro.sh\/",
@@ -76,15 +78,18 @@
 }
 </script>
 
-<meta property="og:title" content="Pi Zero Buildroot" />
+<meta property="og:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
+<meta property="og:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.
+개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop!">
 <meta property="og:url" content="http://blog.cro.sh/posts/pi-zero-buildroot/" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Option::&lt;Title&gt;::None" />
+<meta property="og:site_name" content="Option::None" />
 
-  <meta name="twitter:title" content="Pi Zero Buildroot" />
+  <meta name="twitter:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
+  <meta name="twitter:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임 …">
   <meta name="twitter:card" content="summary" />
   <meta name="generator" content="Hugo 0.59.1" />
-  <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::&lt;Title&gt;::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
@@ -104,7 +109,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="http://blog.cro.sh/">Option::&lt;Title&gt;::None</a>
+      <a class="navbar-brand" href="http://blog.cro.sh/">Option::None</a>
     </div>
 
     <div class="collapse navbar-collapse" id="main-navbar">
@@ -192,7 +197,7 @@
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <div class="posts-heading">
               
-                <h1>Pi Zero Buildroot</h1>
+                <h1>Raspberry Pi Zero-W에 Buildroot 설치하기 (1)</h1>
               
               
                 <hr class="small">
@@ -213,6 +218,131 @@
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
       <article role="main" class="blog-post">
         
+
+<p>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 <a href="https://github.com/cr0sh/lzn">lzn</a>(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 <a href="https://buildroot.org">Buildroot</a>으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.</p>
+
+<hr />
+
+<h1 id="개발-환경">개발 환경</h1>
+
+<ul>
+<li>빌드 장치: Dell XPS 9550</li>
+<li>CPU/RAM: Intel Core i7-6700HQ/8GB</li>
+<li>OS: Pop! OS(Ubuntu) 19.10</li>
+<li>파이에 연결할 수 있는 모니터 없음(노트북이니까)</li>
+<li>UART 시리얼 없음(GPIO 핀 납땜을 안 함)</li>
+<li>데이터 통신 가능한 USB 케이블 없음(=OTG로 컴퓨터와 직접 연결 불가)</li>
+<li>(그나마 믿을 만한) 유일한 통신 수단은 방에 있는 공유기에 Wi-Fi로 연결하는 것</li>
+</ul>
+
+<p>임베디드 리눅스를 모니터 없이 와이파이만으로(&hellip;) 디버깅하는 과정을 지금부터 설명하겠다.</p>
+
+<h1 id="buildroot-다운로드-설정-빌드하기">Buildroot 다운로드/설정/빌드하기</h1>
+
+<p>먼저, 빌드에 필요한 패키지들을 받아주자.</p>
+
+<pre><code class="language-bash">sudo apt install gcc make build-essential libncurses5-dev
+</code></pre>
+
+<p>이게 완전한 리스트는 아니고 첫 빌드 때 한두개씩 누락이 나서 패키지를 설치하라 할 텐데 에러 메시지를 읽고 적절히 설치해주면 된다.</p>
+
+<h2 id="buildroot-다운로드">Buildroot 다운로드</h2>
+
+<pre><code class="language-bash">git clone https://github.com/buildroot/buildroot
+cd buildroot
+</code></pre>
+
+<p>만약에 개발 버전이 아니라 특정 <a href="https://github.com/buildroot/buildroot/releases">릴리즈 버전</a>(나는 <code>2019.11-rc3</code> 릴리즈를 사용했다)을 다운로드하고 싶다면, 다음과 같이 입력하면 된다.</p>
+
+<pre><code class="language-bash">git checkout tags/2019.11-rc3
+</code></pre>
+
+<h2 id="config-조정">Config 조정</h2>
+
+<p>Raspberry Zero-W의 기본 설정은 raspberrypi0w_defconfig이다. 해당 설정을 베이스로 조정하면 된다. 그 후 빌드 옵션 GUI를 실행한다.</p>
+
+<pre><code class="language-bash">make raspberrypi0w_defconfig
+make nconfig
+</code></pre>
+
+<p>중요한 옵션들만 일부 정리해보겠다. 일반적으로 defconfig는 해당 장치에서 간신히 &lsquo;돌아가는&rsquo; 기본 설정이기 때문에 중요한 기능들은 모두 꺼져있다.
+파이를 &lsquo;쓸 만한&rsquo; 장치로 만들기 위해 조정해야 하는 옵션들도 정리할 것이다.</p>
+
+<ul>
+<li>Target options: 빌드할 대상 장치(target)에 관한 옵션이다. 여기의 옵션을 바꿀 일은 (거의) 없다.</li>
+<li>Build options: 빌드 과정에 관한 옵션이다.
+
+<ul>
+<li>Enable compiler cache: 컴파일 결과물을 캐싱한다. 나는 용량이 부족해서 안 켰지만 켜면 첫 빌드 후 결과물을 계속 재활용할 수 있을 것이다.</li>
+</ul></li>
+
+<li><p>Toolchain: 컴파일러 툴체인 관련 설정이다.</p>
+
+<ul>
+<li>Toolchain type: Buildroot 내장 툴체인(Buildroot toolchain) 또는 외부 툴체인(External toolchain) 중 하나를 고를 수 있다.</li>
+<li>Buildroot toolchain: Buildroot 전용 툴체인을 직접 소스에서 빌드한다. <code>make clean</code>을 하면 컴파일러부터 다시 빌드하기 때문에 시간이 조금 걸린다.</li>
+<li>External toolchain: 외부에서 이미 빌드된 툴체인을 가져와 사용할 수 있다. Linaro GCC를 사용하려 했는데 뭐가 문제인지 부팅이 안 되어서 일단 포기.</li>
+<li>C library: <code>libc</code>로 사용할 라이브러리다. Rust는 GNU libc에 대한 지원이 더 좋기 때문에<sup class="footnote-ref" id="fnref:1"><a href="#fn:1">1</a></sup> glibc로 바꾸었다. musl을 사용하고 싶다면 사용하면 된다.</li>
+<li>Custom kernel headers series: 바로 위의 <code>Kernel Headers</code> 옵션과 뭐가 다른지 잘 모르겠지만, 커널과 버전이 안 맞으면 에러 난다. 적당히 바꾸자. (나는 4.19.x)</li>
+<li>Enable C++ support: C++로 작성된 일부 패키지를 빌드하려면 필요하다(ex: <code>vcgencmd</code>). 난 안 써서 비활성화된 상태로 두었다.</li>
+</ul></li>
+
+<li><p>System configuration</p>
+
+<ul>
+<li>System hostname: 설명이 필요 없다.</li>
+<li><strong>/dev management</strong>: Device file 관리 설정이다. 극한의 미니멀리즘을 추구하는 것이 아니라면, <code>mdev</code>나 <code>eudev</code>를 사용하는 것이 좋다. 이들 프로그램이 <a href="https://ko.wikipedia.org/wiki/%ED%94%8C%EB%9F%AC%EA%B7%B8_%EC%95%A4_%ED%94%8C%EB%A0%88%EC%9D%B4">플러그 앤 플레이</a> 지원을 추가해주는데, 안 쓴다면 직접 수동으로 장치들을 관리해야 한다.</li>
+<li>Enable root login with password: 주의해야 할 것이 있는데, 이게 켜져 있다고 ssh에서 <code>root</code>로 로그인할 수 있는 것이 아니다(<code>sshd_config</code>에서 <code>PermitRootlogin</code> 항목을 수정해야 함). 일단 활성화 된 상태로 두었다. 아래의 <code>root password</code>도 설정해주자.</li>
+<li>Root filesystem overlay: 빌드를 모두 끝내고 하나의 이미지로 합치기 전에 해당 디렉토리에 있는 파일들을 복사해오고, 파일이 이미 존재하면 덮어씌운다(overlay). 나는 <code>overlay</code> 폴더로 설정하였다. (<code>buildroot</code> 설치 경로 아래의 상대경로로 인식된다)</li>
+</ul></li>
+
+<li><p>Kernel: Linux kernel 설정이다.</p>
+
+<ul>
+<li><code>raspberrypi0w_defconfig</code>는 <a href="https://github.com/raspberrypi/linux">raspberrypi/linux</a> 레포지토리에서 특정 릴리즈의 tarball을 받아와서 사용한다(메인스트림 리눅스에 파이 전용 패치가 추가된 듯?) 그런데 12월 1일 기준 최신 릴리즈는 <code>20190925</code>인데 반영이 안 되어 있다. <code>$(call github,raspberrypi,linux,raspberrypi-kernel_1.20190925-1)/linux-raspberrypi-kernel_1.20190925-1.tar.gz</code> 으로 바꿔주자. 이 경우 Linux 4.19 커널을 사용하게 될 것이다.</li>
+</ul></li>
+
+<li><p>Target Packages: 함께 설치되는 프로그램들이다.</p>
+
+<ul>
+<li>Show packages that are also provided by busybox: <code>busybox</code>가 제공하는 기능과 겹치는 패키지도 설치할 수 있게 해준다. 예를 들어 <code>bash</code>는 이 옵션이 켜져야 사용 가능하다.</li>
+<li>다음 프로그램들을 추가로 설치해준다.</li>
+<li>Hardware handling-&gt;Firmware-&gt;<code>rpi-wifi-firmware</code></li>
+<li>Hardware handling-&gt;<code>rng-tools</code>
+
+<ul>
+<li>라즈베리 파이에 달린 <a href="https://ko.wikipedia.org/wiki/%ED%95%98%EB%93%9C%EC%9B%A8%EC%96%B4_%EB%82%9C%EC%88%98%EB%B0%9C%EC%83%9D%EA%B8%B0">TRNG</a>를 사용해야 <code>/dev/random</code>이 제대로 초기화가 된다. <strong>사용하지 않으면 <code>sshd</code>가 실행되지 않는다</strong>. <code>ssh-keygen</code> 프로그램이(혹은 <code>ssh</code> 자체가? 확실하지 않음) /dev/random을 사용하여 난수를 생성하기 때문에 /dev/random이 초기화될 때까지 하염없이 기다리기 때문이다<sup class="footnote-ref" id="fnref:2"><a href="#fn:2">2</a></sup>.</li>
+</ul></li>
+<li>Networking Applications-&gt;<code>dhcpcd</code>, <code>openssh</code>, <code>wpa_supplicant</code>
+
+<ul>
+<li><code>wpa_supplicant</code>-&gt;<code>enable autoscan</code>, <code>syslog support</code>, <code>Install wpa_cli binary/wpa_client shared library/wpa_passphrase binary</code></li>
+<li><code>wpa_cli/wpa_client/wpa_passphrase</code>는 host에서 설정하고 overlay로 넣어주면 되기 때문에 필수는 아니다.</li>
+</ul></li>
+</ul></li>
+
+<li><p>Filesystem Images</p>
+
+<ul>
+<li>ext2/3/4 root filesystem-&gt;exact size: 루트 파일시스템의 크기이다. 120M이면 충분하지만 패키지를 많이 추가하면 용량이 부족할 수 있고 그러면 빌드가 실패한다. 필요할 때 적절히 늘리면 된다.</li>
+</ul></li>
+</ul>
+
+<p>이 정도 설정하면, Wi-Fi 기능이 활성화된 리눅스를 빌드할 수 있다. 하지만 각 프로그램을 제대로 설정하지 않아 아직은 완벽하지 않다. overlay를 사용한 설정은 다음 게시글에서 다루기로 한다.</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:1"><a href="https://forge.rust-lang.org/release/platform-support.html">https://forge.rust-lang.org/release/platform-support.html</a>
+ <a class="footnote-return" href="#fnref:1"><sup>[return]</sup></a></li>
+<li id="fn:2"><a href="https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done">https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done</a>
+ <a class="footnote-return" href="#fnref:2"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
 
         
 
@@ -254,7 +384,7 @@
 
           
             &nbsp;&bull;&nbsp;
-            <a href="http://blog.cro.sh/">Option::&lt;Title&gt;::None</a>
+            <a href="http://blog.cro.sh/">Option::None</a>
           
         </p>
         

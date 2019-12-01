@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Option::&lt;Title&gt;::None</title>
+    <title>Posts on Option::None</title>
     <link>http://blog.cro.sh/posts/</link>
-    <description>Recent content in Posts on Option::&lt;Title&gt;::None</description>
+    <description>Recent content in Posts on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <lastBuildDate>Sun, 01 Dec 2019 19:19:27 +0900</lastBuildDate>
@@ -12,12 +12,13 @@
     
     
     <item>
-      <title>Pi Zero Buildroot</title>
+      <title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1)</title>
       <link>http://blog.cro.sh/posts/pi-zero-buildroot/</link>
       <pubDate>Sun, 01 Dec 2019 19:19:27 +0900</pubDate>
       
       <guid>http://blog.cro.sh/posts/pi-zero-buildroot/</guid>
-      <description></description>
+      <description>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &amp;lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&amp;rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.
+개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop!</description>
     </item>
     
   </channel>
