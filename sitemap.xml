@@ -4,12 +4,17 @@
   
   <url>
     <loc>http://blog.cro.sh/</loc>
-    <lastmod>2019-12-01T19:19:27+09:00</lastmod>
+    <lastmod>2020-02-23T17:57:08+09:00</lastmod>
   </url>
   
   <url>
     <loc>http://blog.cro.sh/posts/</loc>
-    <lastmod>2019-12-01T19:19:27+09:00</lastmod>
+    <lastmod>2020-02-23T17:57:08+09:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>http://blog.cro.sh/posts/embedding-wasm-in-html/</loc>
+    <lastmod>2020-02-23T17:57:08+09:00</lastmod>
   </url>
   
   <url>
