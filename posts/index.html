@@ -165,6 +165,47 @@
         <div class="posts-list">
           
             <article class="post-preview">
+    <a href="http://blog.cro.sh/posts/rust-crosscompile-aarch64/">
+        <h2 class="post-title">Windows에서 Rust ARM64 타겟으로 크로스컴파일하기</h2>
+        
+        
+        
+    </a>
+
+    <p class="post-meta">
+        <span class="post-meta">
+  
+  
+  <i class="fas fa-calendar"></i>&nbsp;Posted on April 4, 2020
+  
+  
+  
+  
+    
+      &nbsp;|&nbsp;<i class="fas fa-user"></i>&nbsp;
+    
+  
+  
+</span>
+
+
+    </p>
+    <div class="post-entry">
+        
+        링크 위주로 간략하게 정리한다.
+1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+Windows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)
+Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)
+Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다.
+        <a href="http://blog.cro.sh/posts/rust-crosscompile-aarch64/" class="post-read-more">[Read More]</a>
+        
+    </div>
+
+    
+
+</article>
+          
+            <article class="post-preview">
     <a href="http://blog.cro.sh/posts/embedding-wasm-in-html/">
         <h2 class="post-title">Wasm 모듈 HTML에 내장하기</h2>
         

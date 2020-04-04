@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head>
+    
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Windows에서 Rust ARM64 타겟으로 크로스컴파일하기 - Option::None</title>
+  <meta name="description" content="링크 위주로 간략하게 정리한다.
+1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+Windows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)
+Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)
+Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다."><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "Option::None",
+    
+    "url": "http:\/\/blog.cro.sh\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "http:\/\/blog.cro.sh\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "http:\/\/blog.cro.sh\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "http:\/\/blog.cro.sh\/posts\/rust-crosscompile-aarch64\/",
+          "name": "Windows에서 rust a r m64 타겟으로 크로스컴파일하기"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : ""
+  },
+  "headline": "Windows에서 Rust ARM64 타겟으로 크로스컴파일하기",
+  "description" : "링크 위주로 간략하게 정리한다.\n1. ARM Infocenter에서 툴체인 받기 link: https:\/\/developer.arm.com\/tools-and-software\/open-source-software\/developer-tools\/gnu-toolchain\/gnu-a\/downloads\nWindows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)\nUpdate: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)\nTip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다.",
+  "inLanguage" : "en",
+  "wordCount":  125 ,
+  "datePublished" : "2020-04-04T21:50:17",
+  "dateModified" : "2020-04-04T21:50:17",
+  "image" : "http:\/\/blog.cro.sh\/",
+  "keywords" : [ "" ],
+  "mainEntityOfPage" : "http:\/\/blog.cro.sh\/posts\/rust-crosscompile-aarch64\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "http:\/\/blog.cro.sh\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "http:\/\/blog.cro.sh\/",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+<meta property="og:title" content="Windows에서 Rust ARM64 타겟으로 크로스컴파일하기" />
+<meta property="og:description" content="링크 위주로 간략하게 정리한다.
+1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+Windows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)
+Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)
+Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다.">
+<meta property="og:url" content="http://blog.cro.sh/posts/rust-crosscompile-aarch64/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Option::None" />
+
+  <meta name="twitter:title" content="Windows에서 Rust ARM64 타겟으로 크로스컴파일하기" />
+  <meta name="twitter:description" content="링크 위주로 간략하게 정리한다.
+1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+Windows에서 사용할 것이니 Windows …">
+  <meta name="twitter:card" content="summary" />
+  <meta name="generator" content="Hugo 0.65.2" />
+  <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="http://blog.cro.sh/css/syntax.css" /><link rel="stylesheet" href="http://blog.cro.sh/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css">
+
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://blog.cro.sh/">Option::None</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+
+        
+
+        
+      </ul>
+    </div>
+
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Windows에서 Rust ARM64 타겟으로 크로스컴파일하기</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <p>링크 위주로 간략하게 정리한다.</p>
+<h2 id="1-arm-infocenter에서-툴체인-받기">1. ARM Infocenter에서 툴체인 받기</h2>
+<p>link: <a href="https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads">https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads</a></p>
+<p>Windows에서 사용할 것이니 <code>Windows (mingw-w64-i686) hosted cross compilers</code> 항목에서 <code>AArch32 target with hard float (arm-none-linux-gnueabihf)</code> 항목을 선택했다. (라즈베리 파이 3B 기준)</p>
+<p>Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. <a href="https://releases.linaro.org/components/toolchain/binaries/7.5-2019.12/aarch64-linux-gnu/">2019.12 릴리즈(GCC 7.5)</a></p>
+<p>Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 <code>tar</code> 명령어를 사용하는 것이 속 편하다.</p>
+<h2 id="2-rustup-타겟-추가하기">2. <code>rustup</code> 타겟 추가하기</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">rustup target add aarch64-unknown-linux-gnu
+</code></pre></div><p><code>musl</code>을 사용하는 OS라면 <code>aarch64-unknown-linux-musl</code>을 사용한다.</p>
+<h2 id="3-크로스컴파일-타겟에-대해-링커-지정하기">3. 크로스컴파일 타겟에 대해 링커 지정하기</h2>
+<p>홈 디렉토리(대개 <code>C:\Users\&lt;username&gt;</code>) 내의 <code>.cargo/config</code> 파일을 열고(없으면 새로 생성한다.)</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml">[<span style="color:#a6e22e">target</span>.<span style="color:#a6e22e">aarch64</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">unknown</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">linux</span><span style="color:#960050;background-color:#1e0010">-</span><span style="color:#a6e22e">gnu</span>]
+<span style="color:#a6e22e">linker</span> = <span style="color:#e6db74">&#34;&lt;link&gt;/&lt;to&gt;/&lt;toolchain&gt;/gcc-linaro-7.5.0-2019.12-i686-mingw32_aarch64-linux-gnu/bin/aarch64-linux-gnu-gcc.exe&#34;</span>
+</code></pre></div><p>디렉토리 구분자로 <code>\\</code>를 사용해도 된다. 백슬래시 <strong>두 개</strong>임에 유의.</p>
+<h2 id="4-크로스컴파일">4. 크로스컴파일</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cargo build --target<span style="color:#f92672">=</span>aarch64-unknown-linux-gnu
+</code></pre></div><p><code>target/aarch64-unknown-linux-gnu</code> 폴더 안에 빌드 결과물이 생성된다.</p>
+
+
+        
+
+        
+
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="http://blog.cro.sh/posts/embedding-wasm-in-html/" data-toggle="tooltip" data-placement="top" title="Wasm 모듈 HTML에 내장하기">&larr; Previous Post</a>
+            </li>
+          
+          
+        </ul>
+      
+
+
+      
+
+    </div>
+  </div>
+</div>
+
+      
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2020
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="http://blog.cro.sh/">Option::None</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.65.2</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+<script src="http://blog.cro.sh/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="http://blog.cro.sh/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+
+    
+  </body>
+</html>
+

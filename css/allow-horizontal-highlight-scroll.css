@@ -1,3 +1,4 @@
 .highlight pre:hover {
     float: left;
+    min-width: 100%;
 }
