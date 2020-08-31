@@ -17,11 +17,7 @@
       <pubDate>Sat, 04 Apr 2020 21:50:17 +0900</pubDate>
       
       <guid>http://blog.cro.sh/posts/rust-crosscompile-aarch64/</guid>
-      <description>링크 위주로 간략하게 정리한다.
-1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
-Windows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)
-Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)
-Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다.</description>
+      <description>&lt;p&gt;링크 위주로 간략하게 정리한다.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -30,8 +26,7 @@ Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해
       <pubDate>Sun, 23 Feb 2020 17:57:08 +0900</pubDate>
       
       <guid>http://blog.cro.sh/posts/embedding-wasm-in-html/</guid>
-      <description>레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, &amp;lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까&amp;rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.
-wasm-bindgen: Rust ❤️ WebAssembly Rust는 웹어셈블리 지원을 주된 세일즈 포인트로 잡기 때문에, 관련 라이브러리도 잘 발달되어 있다. wasm-bindgen은 Rust 코드를 몇 개의 attribute(파이썬, 자바의 decorator와 유사하다고 생각하면 편하다)만 추가해 WebAssembly 모듈로 바꿀 수 있게 해 준다.</description>
+      <description>&lt;p&gt;레지스트리를 암호화해 저장하는 프로그램인 &lt;a href=&#34;https://github.com/cr0sh/zandam&#34;&gt;Zandam&lt;/a&gt;을 개발하면서, &amp;lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까&amp;rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -40,8 +35,9 @@ wasm-bindgen: Rust ❤️ WebAssembly Rust는 웹어셈블리 지원을 주된 �
       <pubDate>Sun, 01 Dec 2019 19:19:27 +0900</pubDate>
       
       <guid>http://blog.cro.sh/posts/pi-zero-buildroot/</guid>
-      <description>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &amp;lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&amp;rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.
- 개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop!</description>
+      <description>&lt;p&gt;라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 &lt;a href=&#34;https://github.com/cr0sh/lzn&#34;&gt;lzn&lt;/a&gt;(현재 private)을 개발하면서 &amp;lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&amp;rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 &lt;a href=&#34;https://buildroot.org&#34;&gt;Buildroot&lt;/a&gt;으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.&lt;/p&gt;</description>
     </item>
     
   </channel>

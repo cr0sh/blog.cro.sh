@@ -8,11 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
   <title>Windows에서 Rust ARM64 타겟으로 크로스컴파일하기 - Option::None</title>
-  <meta name="description" content="링크 위주로 간략하게 정리한다.
-1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
-Windows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)
-Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)
-Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다."><script type="application/ld+json">
+  <meta name="description" content="링크 위주로 간략하게 정리한다."><script type="application/ld+json">
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
@@ -60,7 +56,7 @@ Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해
     "name" : ""
   },
   "headline": "Windows에서 Rust ARM64 타겟으로 크로스컴파일하기",
-  "description" : "링크 위주로 간략하게 정리한다.\n1. ARM Infocenter에서 툴체인 받기 link: https:\/\/developer.arm.com\/tools-and-software\/open-source-software\/developer-tools\/gnu-toolchain\/gnu-a\/downloads\nWindows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)\nUpdate: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)\nTip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다.",
+  "description" : "링크 위주로 간략하게 정리한다.\n",
   "inLanguage" : "en",
   "wordCount":  125 ,
   "datePublished" : "2020-04-04T21:50:17",
@@ -82,21 +78,15 @@ Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해
 </script>
 
 <meta property="og:title" content="Windows에서 Rust ARM64 타겟으로 크로스컴파일하기" />
-<meta property="og:description" content="링크 위주로 간략하게 정리한다.
-1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
-Windows에서 사용할 것이니 Windows (mingw-w64-i686) hosted cross compilers 항목에서 AArch32 target with hard float (arm-none-linux-gnueabihf) 항목을 선택했다. (라즈베리 파이 3B 기준)
-Update: ARM GCC는 버전이 너무 높아서 호환이 안 되는 것인지 링킹 오류가 발생하였다. Linaro 툴체인을 사용하자. 2019.12 릴리즈(GCC 7.5)
-Tip: 반디집 등의 프로그램은 심링크를 제대로 처리하지 못해 오류가 발생하는 것 같다. 직접 명령창에서 mingw64 등의 tar 명령어를 사용하는 것이 속 편하다.">
+<meta property="og:description" content="링크 위주로 간략하게 정리한다.">
 <meta property="og:url" content="http://blog.cro.sh/posts/rust-crosscompile-aarch64/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Option::None" />
 
   <meta name="twitter:title" content="Windows에서 Rust ARM64 타겟으로 크로스컴파일하기" />
-  <meta name="twitter:description" content="링크 위주로 간략하게 정리한다.
-1. ARM Infocenter에서 툴체인 받기 link: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
-Windows에서 사용할 것이니 Windows …">
+  <meta name="twitter:description" content="링크 위주로 간략하게 정리한다.">
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.65.2" />
+  <meta name="generator" content="Hugo 0.74.3" />
   <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
@@ -241,7 +231,6 @@ Windows에서 사용할 것이니 Windows …">
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">cargo build --target<span style="color:#f92672">=</span>aarch64-unknown-linux-gnu
 </code></pre></div><p><code>target/aarch64-unknown-linux-gnu</code> 폴더 안에 빌드 결과물이 생성된다.</p>
 
-
         
 
         
@@ -291,7 +280,7 @@ Windows에서 사용할 것이니 Windows …">
         </p>
         
         <p class="credits theme-by text-muted">
-          <a href="https://gohugo.io">Hugo v0.65.2</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
           
         </p>
       </div>

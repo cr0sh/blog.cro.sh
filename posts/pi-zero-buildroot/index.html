@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
   <title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1) - Option::None</title>
-  <meta name="description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.
- 개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop!"><script type="application/ld+json">
+  <meta name="description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다."><script type="application/ld+json">
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
@@ -57,7 +58,7 @@
     "name" : ""
   },
   "headline": "Raspberry Pi Zero-W에 Buildroot 설치하기 (1)",
-  "description" : "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 \x26lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까\x26rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n 개발 환경  빌드 장치: Dell XPS 9550 CPU\/RAM: Intel Core i7-6700HQ\/8GB OS: Pop!",
+  "description" : "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 \u0026lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까\u0026rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n",
   "inLanguage" : "en",
   "wordCount":  679 ,
   "datePublished" : "2019-12-01T19:19:27",
@@ -79,16 +80,19 @@
 </script>
 
 <meta property="og:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
-<meta property="og:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.
- 개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop!">
+<meta property="og:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.">
 <meta property="og:url" content="http://blog.cro.sh/posts/pi-zero-buildroot/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Option::None" />
 
   <meta name="twitter:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
-  <meta name="twitter:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임 …">
+  <meta name="twitter:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임 …">
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.65.2" />
+  <meta name="generator" content="Hugo 0.74.3" />
   <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
@@ -218,7 +222,6 @@
         <p>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
 그러다가 <a href="https://github.com/cr0sh/lzn">lzn</a>(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 <a href="https://buildroot.org">Buildroot</a>으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.</p>
-<hr>
 <h1 id="개발-환경">개발 환경</h1>
 <ul>
 <li>빌드 장치: Dell XPS 9550</li>
@@ -326,7 +329,6 @@ make nconfig
 </ol>
 </section>
 
-
         
 
         
@@ -376,7 +378,7 @@ make nconfig
         </p>
         
         <p class="credits theme-by text-muted">
-          <a href="https://gohugo.io">Hugo v0.65.2</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
           
         </p>
       </div>
