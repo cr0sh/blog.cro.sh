@@ -6,10 +6,18 @@
     <description>Recent content in Posts on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
-    <lastBuildDate>Sat, 04 Apr 2020 21:50:17 +0900</lastBuildDate>
-    
-	<atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
-    
+    <lastBuildDate>Sun, 14 Feb 2021 16:44:32 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>CS6265 Epilogue</title>
+      <link>http://blog.cro.sh/posts/cs6265-epilogue/</link>
+      <pubDate>Sun, 14 Feb 2021 16:44:32 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/cs6265-epilogue/</guid>
+      <description>&lt;p&gt;동계 디지털 국제 계절수업 프로그램을 통해 조지아 공대의
+&lt;a href=&#34;https://omscs.gatech.edu/cs-6265-information-security-lab&#34;&gt;Information Security Lab (CS6265)&lt;/a&gt;
+수업을 들어볼 수 있었다. 겨울방학 동한 공부한 컴퓨터 보안에 대해 정리해보고자 한다.
+당연히 이 글을 읽는 누군가는 이 수업을 들을 수도 있기 때문에, 스포일러는 최대한 자제할 것이다. 무엇을 배웠는지 위주로 정리한다.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Windows에서 Rust ARM64 타겟으로 크로스컴파일하기</title>

@@ -5,10 +5,6 @@
     <link>http://blog.cro.sh/categories/</link>
     <description>Recent content in Categories on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>ko-kr</language>
-    
-	<atom:link href="http://blog.cro.sh/categories/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <language>ko-kr</language><atom:link href="http://blog.cro.sh/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

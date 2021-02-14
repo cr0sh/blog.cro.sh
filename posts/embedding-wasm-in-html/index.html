@@ -8,7 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
   <title>Wasm 모듈 HTML에 내장하기 - Option::None</title>
-  <meta name="description" content="레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, &lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까&rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다."><script type="application/ld+json">
+  <meta name="description" content="레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, &lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까&rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.">
+  <meta name="author" content="Nam Junghyun"/><script type="application/ld+json">
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
@@ -53,7 +54,7 @@
   "@context": "http://schema.org",
   "@type": "Article",
   "author": {
-    "name" : ""
+    "name" : "Nam Junghyun"
   },
   "headline": "Wasm 모듈 HTML에 내장하기",
   "description" : "레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, \u0026lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까\u0026rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.\n",
@@ -86,7 +87,7 @@
   <meta name="twitter:title" content="Wasm 모듈 HTML에 내장하기" />
   <meta name="twitter:description" content="레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, &lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까&rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, …">
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.74.3" />
+  <meta name="generator" content="Hugo 0.79.1" />
   <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
@@ -269,8 +270,8 @@
     &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;module&#34;</span>&gt;
       <span style="color:#66d9ef">import</span> <span style="color:#a6e22e">init</span>, { <span style="color:#a6e22e">add_two</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;./pkg/mylib.js&#39;</span>;
 
-      <span style="color:#a6e22e">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
-        <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">init</span>();
+      <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
+        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">init</span>();
 
         <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
         <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`1 + 2 = </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
@@ -387,8 +388,8 @@
         <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_base64</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=&#34;</span>;
         <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Uint8Array</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">atob</span>(<span style="color:#a6e22e">wasm_base64</span>), <span style="color:#a6e22e">c</span> =&gt; <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#ae81ff">0</span>)).<span style="color:#a6e22e">buffer</span>;
 
-        <span style="color:#a6e22e">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
-            <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">init</span>(<span style="color:#a6e22e">wasm_binary</span>);
+        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
+            <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">init</span>(<span style="color:#a6e22e">wasm_binary</span>);
 
             <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
             <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`1 + 2 = </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
@@ -414,7 +415,7 @@
         <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;type&#34;</span>, <span style="color:#e6db74">&#34;module&#34;</span>);
         <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;generated&#34;</span>, <span style="color:#66d9ef">true</span>);
         <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">id</span>) <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">id</span>;
-        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`/* generated */ import init, { add_two } from &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">src</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;;</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#e6db74">n`</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">textContent</span>;
+        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`/* generated */ import init, { add_two } from &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">src</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;;\n\n`</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">textContent</span>;
 
         <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">replaceWith</span>(<span style="color:#a6e22e">main_replace</span>)
     &lt;/<span style="color:#f92672">script</span>&gt;
@@ -465,10 +466,14 @@
         </ul>
         <p class="credits copyright text-muted">
           
+            
+              Nam Junghyun
+            
+          
 
           &nbsp;&bull;&nbsp;&copy;
           
-            2020
+            2019 - 2021
           
 
           
@@ -478,7 +483,7 @@
         </p>
         
         <p class="credits theme-by text-muted">
-          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          <a href="https://gohugo.io">Hugo v0.79.1</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
           
         </p>
       </div>

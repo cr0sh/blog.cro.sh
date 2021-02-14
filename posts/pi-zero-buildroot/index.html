@@ -10,7 +10,8 @@
   <title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1) - Option::None</title>
   <meta name="description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
-보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다."><script type="application/ld+json">
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.">
+  <meta name="author" content="Nam Junghyun"/><script type="application/ld+json">
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
@@ -55,12 +56,12 @@
   "@context": "http://schema.org",
   "@type": "Article",
   "author": {
-    "name" : ""
+    "name" : "Nam Junghyun"
   },
   "headline": "Raspberry Pi Zero-W에 Buildroot 설치하기 (1)",
   "description" : "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 \u0026lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까\u0026rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n",
   "inLanguage" : "en",
-  "wordCount":  679 ,
+  "wordCount":  702 ,
   "datePublished" : "2019-12-01T19:19:27",
   "dateModified" : "2019-12-01T19:19:27",
   "image" : "http:\/\/blog.cro.sh\/",
@@ -92,7 +93,7 @@
 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임 …">
   <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.74.3" />
+  <meta name="generator" content="Hugo 0.79.1" />
   <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
@@ -264,10 +265,14 @@ make nconfig
 <li>Toolchain type: Buildroot 내장 툴체인(Buildroot toolchain) 또는 외부 툴체인(External toolchain) 중 하나를 고를 수 있다.
 <ul>
 <li>Buildroot toolchain: Buildroot 전용 툴체인을 직접 소스에서 빌드한다. <code>make clean</code>을 하면 컴파일러부터 다시 빌드하기 때문에 시간이 조금 걸린다.</li>
-<li>External toolchain: 외부에서 이미 빌드된 툴체인을 가져와 사용할 수 있다. Linaro GCC를 사용하려 했는데 뭐가 문제인지 부팅이 안 되어서 일단 포기.</li>
+<li>External toolchain: 외부에서 이미 빌드된 툴체인을 가져와 사용할 수 있다. Linaro GCC를 사용하려 했는데 뭐가 문제인지 부팅이 안 되어서 일단 포기.
+<ul>
+<li><strong>Update</strong>: armv6 musl toolchain을 사용하면 된다. <a href="https://musl.cc/">https://musl.cc/</a> (비공식 사이트)에서 <code>armv6-linux-musleabihf-cross.tgz</code>를 다운로드하자. Toolchain prefix는 <code>armv6-linux-musleabihf</code>여야 한다.</li>
 </ul>
 </li>
-<li>C library: <code>libc</code>로 사용할 라이브러리다. Rust는 GNU libc에 대한 지원이 더 좋기 때문에<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> glibc로 바꾸었다. musl을 사용하고 싶다면 사용하면 된다.</li>
+</ul>
+</li>
+<li>C library: <code>libc</code>로 사용할 라이브러리다. Rust는 GNU libc에 대한 지원이 더 좋기 때문에<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> glibc로 바꾸었다. musl을 사용하고 싶다면 사용하면 된다. Update: ARMv6 MUSL도 이제 Tier 2에 포함되어 동등해졌다.</li>
 <li>Custom kernel headers series: 바로 위의 <code>Kernel Headers</code> 옵션과 뭐가 다른지 잘 모르겠지만, 커널과 버전이 안 맞으면 에러 난다. 적당히 바꾸자. (나는 4.19.x)</li>
 <li>Enable C++ support: C++로 작성된 일부 패키지를 빌드하려면 필요하다(ex: <code>vcgencmd</code>). 난 안 써서 비활성화된 상태로 두었다.</li>
 </ul>
@@ -365,10 +370,14 @@ make nconfig
         </ul>
         <p class="credits copyright text-muted">
           
+            
+              Nam Junghyun
+            
+          
 
           &nbsp;&bull;&nbsp;&copy;
           
-            2020
+            2019 - 2021
           
 
           
@@ -378,7 +387,7 @@ make nconfig
         </p>
         
         <p class="credits theme-by text-muted">
-          <a href="https://gohugo.io">Hugo v0.74.3</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          <a href="https://gohugo.io">Hugo v0.79.1</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
           
         </p>
       </div>
