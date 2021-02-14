@@ -334,7 +334,7 @@ shellcode <span style="color:#f92672">=</span> shellcraft<span style="color:#f92
 <p>사실상 Lab 6까지의 내용에서 추가된 것은 거의 없지만, 모든 공격을 <strong>원격</strong>으로 수행해야 한다. 즉 GDB를 타깃에 직접 붙이거나 할 수 없고
 <code>nc</code>(netcat) 등으로 통신하여 payload를 보내는 것만 가능하다. (일부 문제는 바이너리를 제공해서 분석하거나 로컬에서 돌려볼 수는 있었다)</p>
 <p>여기서 그 유명한 <a href="https://en.wikipedia.org/wiki/Shellshock_(software_bug)">Shellshock</a> 취약점을 사용하여 CGI 웹 서버를 털어보는 체험(?)을 할 수 있었다.</p>
-<h1 id="lab-8-miscellanous-bugs">Lab 8: Miscellanous bugs</h1>
+<h1 id="lab-8-miscellaneous-bugs">Lab 8: Miscellaneous bugs</h1>
 <p>앞에서 다루지 않았던 자잘한 버그들을 다룬다.</p>
 <ul>
 <li>Integer overflow: 오버플로를 고려하지 않은 코드들의 체크를 우회하는 법을 시연한다. 간단한 예로 <code>x*x &gt;= 0</code>이 항상 참인지 생각해보자.</li>
