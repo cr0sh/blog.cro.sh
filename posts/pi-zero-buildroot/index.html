@@ -1,229 +1,189 @@
 <!DOCTYPE html>
-<html lang="en" itemscope itemtype="http://schema.org/WebPage">
-  <head>
-    
+<html lang="en" dir="auto">
 
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
-  <title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1) - Option::None</title>
-  <meta name="description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1) | Option::None</title>
+<meta name="keywords" content="" />
+<meta name="description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.">
-  <meta name="author" content="Nam Junghyun"/><script type="application/ld+json">
+<meta name="author" content="">
+<link rel="canonical" href="http://blog.cro.sh/posts/pi-zero-buildroot/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://blog.cro.sh/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://blog.cro.sh/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://blog.cro.sh/apple-touch-icon.png">
+<link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<meta name="generator" content="Hugo 0.88.1" />
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
+<meta property="og:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://blog.cro.sh/posts/pi-zero-buildroot/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2019-12-01T19:19:27&#43;09:00" />
+<meta property="article:modified_time" content="2019-12-01T19:19:27&#43;09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)"/>
+<meta name="twitter:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
+보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다."/>
+
+
+<script type="application/ld+json">
 {
-    "@context": "http://schema.org",
-    "@type": "WebSite",
-    "name": "Option::None",
-    
-    "url": "http:\/\/blog.cro.sh\/"
-}
-</script><script type="application/ld+json">
-{
-  "@context": "http://schema.org",
-  "@type": "Organization",
-  "name": "",
-  "url": "http:\/\/blog.cro.sh\/"
-  
-  
-  
-  
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://blog.cro.sh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Raspberry Pi Zero-W에 Buildroot 설치하기 (1)",
+      "item": "http://blog.cro.sh/posts/pi-zero-buildroot/"
+    }
+  ]
 }
 </script>
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [{
-        "@type": "ListItem",
-        "position": 1,
-        "item": {
-          "@id": "http:\/\/blog.cro.sh\/",
-          "name": "home"
-        }
-    },{
-        "@type": "ListItem",
-        "position": 3,
-        "item": {
-          "@id": "http:\/\/blog.cro.sh\/posts\/pi-zero-buildroot\/",
-          "name": "Raspberry pi zero w에 buildroot 설치하기 (1)"
-        }
-    }]
-}
-</script><script type="application/ld+json">
-{
-  "@context": "http://schema.org",
-  "@type": "Article",
-  "author": {
-    "name" : "Nam Junghyun"
-  },
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
   "headline": "Raspberry Pi Zero-W에 Buildroot 설치하기 (1)",
-  "description" : "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 \u0026lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까\u0026rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n",
-  "inLanguage" : "en",
-  "wordCount":  702 ,
-  "datePublished" : "2019-12-01T19:19:27",
-  "dateModified" : "2019-12-01T19:19:27",
-  "image" : "http:\/\/blog.cro.sh\/",
-  "keywords" : [ "" ],
-  "mainEntityOfPage" : "http:\/\/blog.cro.sh\/posts\/pi-zero-buildroot\/",
-  "publisher" : {
+  "name": "Raspberry Pi Zero-W에 Buildroot 설치하기 (1)",
+  "description": "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 \u0026lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까\u0026rsquo; 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 ‘이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까’ 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop! OS(Ubuntu) 19.10 파이에 연결할 수 있는 모니터 없음(노트북이니까) UART 시리얼 없음(GPIO 핀 납땜을 안 함) 데이터 통신 가능한 USB 케이블 없음(=OTG로 컴퓨터와 직접 연결 불가) (그나마 믿을 만한) 유일한 통신 수단은 방에 있는 공유기에 Wi-Fi로 연결하는 것  임베디드 리눅스를 모니터 없이 와이파이만으로(…) 디버깅하는 과정을 지금부터 설명하겠다.\nBuildroot 다운로드/설정/빌드하기 먼저, 빌드에 필요한 패키지들을 받아주자.\nsudo apt install gcc make build-essential libncurses5-dev 이게 완전한 리스트는 아니고 첫 빌드 때 한두개씩 누락이 나서 패키지를 설치하라 할 텐데 에러 메시지를 읽고 적절히 설치해주면 된다.\nBuildroot 다운로드 git clone https://github.com/buildroot/buildroot cd buildroot 만약에 개발 버전이 아니라 특정 릴리즈 버전(나는 2019.11-rc3 릴리즈를 사용했다)을 다운로드하고 싶다면, 다음과 같이 입력하면 된다.\ngit checkout tags/2019.11-rc3 Config 조정 Raspberry Zero-W의 기본 설정은 raspberrypi0w_defconfig이다. 해당 설정을 베이스로 조정하면 된다. 그 후 빌드 옵션 GUI를 실행한다.\nmake raspberrypi0w_defconfig make nconfig 중요한 옵션들만 일부 정리해보겠다. 일반적으로 defconfig는 해당 장치에서 간신히 ‘돌아가는’ 기본 설정이기 때문에 중요한 기능들은 모두 꺼져있다. 파이를 ‘쓸 만한’ 장치로 만들기 위해 조정해야 하는 옵션들도 정리할 것이다.\n  Target options: 빌드할 대상 장치(target)에 관한 옵션이다. 여기의 옵션을 바꿀 일은 (거의) 없다.\n  Build options: 빌드 과정에 관한 옵션이다.\n Enable compiler cache: 컴파일 결과물을 캐싱한다. 나는 용량이 부족해서 안 켰지만 켜면 첫 빌드 후 결과물을 계속 재활용할 수 있을 것이다.    Toolchain: 컴파일러 툴체인 관련 설정이다.\n Toolchain type: Buildroot 내장 툴체인(Buildroot toolchain) 또는 외부 툴체인(External toolchain) 중 하나를 고를 수 있다.  Buildroot toolchain: Buildroot 전용 툴체인을 직접 소스에서 빌드한다. make clean을 하면 컴파일러부터 다시 빌드하기 때문에 시간이 조금 걸린다. External toolchain: 외부에서 이미 빌드된 툴체인을 가져와 사용할 수 있다. Linaro GCC를 사용하려 했는데 뭐가 문제인지 부팅이 안 되어서 일단 포기.  Update: armv6 musl toolchain을 사용하면 된다. https://musl.cc/ (비공식 사이트)에서 armv6-linux-musleabihf-cross.tgz를 다운로드하자. Toolchain prefix는 armv6-linux-musleabihf여야 한다.     C library: libc로 사용할 라이브러리다. Rust는 GNU libc에 대한 지원이 더 좋기 때문에1 glibc로 바꾸었다. musl을 사용하고 싶다면 사용하면 된다. Update: ARMv6 MUSL도 이제 Tier 2에 포함되어 동등해졌다. Custom kernel headers series: 바로 위의 Kernel Headers 옵션과 뭐가 다른지 잘 모르겠지만, 커널과 버전이 안 맞으면 에러 난다. 적당히 바꾸자. (나는 4.19.x) Enable C++ support: C++로 작성된 일부 패키지를 빌드하려면 필요하다(ex: vcgencmd). 난 안 써서 비활성화된 상태로 두었다.    System configuration\n System hostname: 설명이 필요 없다. /dev management: Device file 관리 설정이다. 극한의 미니멀리즘을 추구하는 것이 아니라면, mdev나 eudev를 사용하는 것이 좋다. 이들 프로그램이 플러그 앤 플레이 지원을 추가해주는데, 안 쓴다면 직접 수동으로 장치들을 관리해야 한다. Enable root login with password: 주의해야 할 것이 있는데, 이게 켜져 있다고 ssh에서 root로 로그인할 수 있는 것이 아니다(sshd_config에서 PermitRootlogin 항목을 수정해야 함). 일단 활성화 된 상태로 두었다. 아래의 root password도 설정해주자. Root filesystem overlay: 빌드를 모두 끝내고 하나의 이미지로 합치기 전에 해당 디렉토리에 있는 파일들을 복사해오고, 파일이 이미 존재하면 덮어씌운다(overlay). 나는 overlay 폴더로 설정하였다. (buildroot 설치 경로 아래의 상대경로로 인식된다)    Kernel: Linux kernel 설정이다.\n raspberrypi0w_defconfig는 raspberrypi/linux 레포지토리에서 특정 릴리즈의 tarball을 받아와서 사용한다(메인스트림 리눅스에 파이 전용 패치가 추가된 듯?) 그런데 12월 1일 기준 최신 릴리즈는 20190925인데 반영이 안 되어 있다. $(call github,raspberrypi,linux,raspberrypi-kernel_1.20190925-1)/linux-raspberrypi-kernel_1.20190925-1.tar.gz 으로 바꿔주자. 이 경우 Linux 4.19 커널을 사용하게 될 것이다.    Target Packages: 함께 설치되는 프로그램들이다.\n Show packages that are also provided by busybox: busybox가 제공하는 기능과 겹치는 패키지도 설치할 수 있게 해준다. 예를 들어 bash는 이 옵션이 켜져야 사용 가능하다. 다음 프로그램들을 추가로 설치해준다.  Hardware handling-Firmware-rpi-wifi-firmware Hardware handling-rng-tools  라즈베리 파이에 달린 TRNG를 사용해야 /dev/random이 제대로 초기화가 된다. 사용하지 않으면 sshd가 실행되지 않는다. ssh-keygen 프로그램이(혹은 ssh 자체가? 확실하지 않음) /dev/random을 사용하여 난수를 생성하기 때문에 /dev/random이 초기화될 때까지 하염없이 기다리기 때문이다2.   Networking Applications-dhcpcd, openssh, wpa_supplicant  wpa_supplicant-enable autoscan, syslog support, Install wpa_cli binary/wpa_client shared library/wpa_passphrase binary wpa_cli/wpa_client/wpa_passphrase는 host에서 설정하고 overlay로 넣어주면 되기 때문에 필수는 아니다.        Filesystem Images\n ext2/3/4 root filesystem-exact size: 루트 파일시스템의 크기이다. 120M이면 충분하지만 패키지를 많이 추가하면 용량이 부족할 수 있고 그러면 빌드가 실패한다. 필요할 때 적절히 늘리면 된다.    이 정도 설정하면, Wi-Fi 기능이 활성화된 리눅스를 빌드할 수 있다. 하지만 각 프로그램을 제대로 설정하지 않아 아직은 완벽하지 않다. overlay를 사용한 설정은 다음 게시글에서 다루기로 한다.\n  https://forge.rust-lang.org/release/platform-support.html ↩︎\n https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done ↩︎\n  ",
+  "wordCount" : "700",
+  "inLanguage": "en",
+  "datePublished": "2019-12-01T19:19:27+09:00",
+  "dateModified": "2019-12-01T19:19:27+09:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://blog.cro.sh/posts/pi-zero-buildroot/"
+  },
+  "publisher": {
     "@type": "Organization",
-    "name" : "http:\/\/blog.cro.sh\/",
-    "logo" : {
-        "@type" : "ImageObject",
-        "url" : "http:\/\/blog.cro.sh\/",
-        "height" :  60 ,
-        "width" :  60
+    "name": "Option::None",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://blog.cro.sh/favicon.ico"
     }
   }
 }
 </script>
+</head>
 
-<meta property="og:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
-<meta property="og:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
-그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
-보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.">
-<meta property="og:url" content="http://blog.cro.sh/posts/pi-zero-buildroot/" />
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="Option::None" />
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
 
-  <meta name="twitter:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
-  <meta name="twitter:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
-그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
-보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임 …">
-  <meta name="twitter:card" content="summary" />
-  <meta name="generator" content="Hugo 0.79.1" />
-  <link rel="alternate" href="http://blog.cro.sh/index.xml" type="application/rss+xml" title="Option::None"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="http://blog.cro.sh/css/syntax.css" /><link rel="stylesheet" href="http://blog.cro.sh/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous"><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css">
+</script>
 
-
-  </head>
-  <body>
-    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="http://blog.cro.sh/">Option::None</a>
-    </div>
-
-    <div class="collapse navbar-collapse" id="main-navbar">
-      <ul class="nav navbar-nav navbar-right">
-        
-
-        
-
-        
-      </ul>
-    </div>
-
-    
-
-  </div>
-</nav>
-
-
-
-
-    
-
-
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-<div class="pswp__bg"></div>
-
-<div class="pswp__scroll-wrap">
-    
-    <div class="pswp__container">
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-      <div class="pswp__item"></div>
-    </div>
-    
-    <div class="pswp__ui pswp__ui--hidden">
-    <div class="pswp__top-bar">
-      
-      <div class="pswp__counter"></div>
-      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-      <button class="pswp__button pswp__button--share" title="Share"></button>
-      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-      
-      
-      <div class="pswp__preloader">
-        <div class="pswp__preloader__icn">
-          <div class="pswp__preloader__cut">
-            <div class="pswp__preloader__donut"></div>
-          </div>
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
         </div>
-      </div>
-    </div>
-    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-      <div class="pswp__share-tooltip"></div>
-    </div>
-    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-    </button>
-    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-    </button>
-    <div class="pswp__caption">
-      <div class="pswp__caption__center"></div>
-    </div>
-    </div>
-    </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Raspberry Pi Zero-W에 Buildroot 설치하기 (1)
+    </h1>
+    <div class="post-meta">December 1, 2019
 </div>
-
-
-  
-  
-  
-
-
-
-
-
-
-  
-
-  <header class="header-section ">
-    
-    <div class="intro-header no-img">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-            <div class="posts-heading">
-              
-                <h1>Raspberry Pi Zero-W에 Buildroot 설치하기 (1)</h1>
-              
-              
-                <hr class="small">
-              
-              
-              
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-
-    
-<div class="container" role="main">
-  <div class="row">
-    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-      <article role="main" class="blog-post">
-        <p>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
+  </header> 
+  <div class="post-content"><p>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
 그러다가 <a href="https://github.com/cr0sh/lzn">lzn</a>(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 <a href="https://buildroot.org">Buildroot</a>으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.</p>
-<h1 id="개발-환경">개발 환경</h1>
+<h1 id="개발-환경">개발 환경<a hidden class="anchor" aria-hidden="true" href="#개발-환경">#</a></h1>
 <ul>
 <li>빌드 장치: Dell XPS 9550</li>
 <li>CPU/RAM: Intel Core i7-6700HQ/8GB</li>
@@ -234,18 +194,18 @@
 <li>(그나마 믿을 만한) 유일한 통신 수단은 방에 있는 공유기에 Wi-Fi로 연결하는 것</li>
 </ul>
 <p>임베디드 리눅스를 모니터 없이 와이파이만으로(&hellip;) 디버깅하는 과정을 지금부터 설명하겠다.</p>
-<h1 id="buildroot-다운로드설정빌드하기">Buildroot 다운로드/설정/빌드하기</h1>
+<h1 id="buildroot-다운로드설정빌드하기">Buildroot 다운로드/설정/빌드하기<a hidden class="anchor" aria-hidden="true" href="#buildroot-다운로드설정빌드하기">#</a></h1>
 <p>먼저, 빌드에 필요한 패키지들을 받아주자.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt install gcc make build-essential libncurses5-dev
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt install gcc make build-essential libncurses5-dev
 </code></pre></div><p>이게 완전한 리스트는 아니고 첫 빌드 때 한두개씩 누락이 나서 패키지를 설치하라 할 텐데 에러 메시지를 읽고 적절히 설치해주면 된다.</p>
-<h2 id="buildroot-다운로드">Buildroot 다운로드</h2>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone https://github.com/buildroot/buildroot
+<h2 id="buildroot-다운로드">Buildroot 다운로드<a hidden class="anchor" aria-hidden="true" href="#buildroot-다운로드">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone https://github.com/buildroot/buildroot
 cd buildroot
 </code></pre></div><p>만약에 개발 버전이 아니라 특정 <a href="https://github.com/buildroot/buildroot/releases">릴리즈 버전</a>(나는 <code>2019.11-rc3</code> 릴리즈를 사용했다)을 다운로드하고 싶다면, 다음과 같이 입력하면 된다.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git checkout tags/2019.11-rc3
-</code></pre></div><h2 id="config-조정">Config 조정</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git checkout tags/2019.11-rc3
+</code></pre></div><h2 id="config-조정">Config 조정<a hidden class="anchor" aria-hidden="true" href="#config-조정">#</a></h2>
 <p>Raspberry Zero-W의 기본 설정은 raspberrypi0w_defconfig이다. 해당 설정을 베이스로 조정하면 된다. 그 후 빌드 옵션 GUI를 실행한다.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">make raspberrypi0w_defconfig
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">make raspberrypi0w_defconfig
 make nconfig
 </code></pre></div><p>중요한 옵션들만 일부 정리해보겠다. 일반적으로 defconfig는 해당 장치에서 간신히 &lsquo;돌아가는&rsquo; 기본 설정이기 때문에 중요한 기능들은 모두 꺼져있다.
 파이를 &lsquo;쓸 만한&rsquo; 장치로 만들기 위해 조정해야 하는 옵션들도 정리할 것이다.</p>
@@ -326,90 +286,87 @@ make nconfig
 <hr>
 <ol>
 <li id="fn:1" role="doc-endnote">
-<p><a href="https://forge.rust-lang.org/release/platform-support.html">https://forge.rust-lang.org/release/platform-support.html</a> <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p><a href="https://forge.rust-lang.org/release/platform-support.html">https://forge.rust-lang.org/release/platform-support.html</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:2" role="doc-endnote">
-<p><a href="https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done">https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done</a> <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p><a href="https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done">https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done</a>&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </section>
 
-        
-
-        
-
-        
-      </article>
-
-      
-        <ul class="pager blog-pager">
-          
-          
-            <li class="next">
-              <a href="http://blog.cro.sh/posts/embedding-wasm-in-html/" data-toggle="tooltip" data-placement="top" title="Wasm 모듈 HTML에 내장하기">Next Post &rarr;</a>
-            </li>
-          
-        </ul>
-      
-
-
-      
-
-    </div>
   </div>
-</div>
 
-      
-<footer>
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-        <ul class="list-inline text-center footer-links">
-          
-          
-        </ul>
-        <p class="credits copyright text-muted">
-          
-            
-              Nam Junghyun
-            
-          
-
-          &nbsp;&bull;&nbsp;&copy;
-          
-            2019 - 2021
-          
-
-          
-            &nbsp;&bull;&nbsp;
-            <a href="http://blog.cro.sh/">Option::None</a>
-          
-        </p>
-        
-        <p class="credits theme-by text-muted">
-          <a href="https://gohugo.io">Hugo v0.79.1</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
-          
-        </p>
-      </div>
-    </div>
-  </div>
-</footer><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous"></script>
-<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-<script src="http://blog.cro.sh/js/main.js"></script><script> renderMathInElement(document.body); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="http://blog.cro.sh/js/load-photoswipe.js"></script>
-
-
-
-
-
-
-
-
-
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main>
     
-  </body>
-</html>
+<footer class="footer">
+    <span>© 2019-2021 Nam Junghyun</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
 
+<script>
+    let menu = document.getElementById('menu')
+    menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+    menu.onscroll = function () {
+        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

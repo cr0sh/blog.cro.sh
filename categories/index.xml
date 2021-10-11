@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Categories on Option::None</title>
     <link>http://blog.cro.sh/categories/</link>
     <description>Recent content in Categories on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>ko-kr</language><atom:link href="http://blog.cro.sh/categories/index.xml" rel="self" type="application/rss+xml" />
+    <language>ko-kr</language>
+    <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright><atom:link href="http://blog.cro.sh/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

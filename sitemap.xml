@@ -1,43 +1,30 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
+    <loc>http://blog.cro.sh/posts/cloudflare-workers-rust/</loc>
+    <lastmod>2021-10-04T19:16:56+09:00</lastmod>
+  </url><url>
+    <loc>http://blog.cro.sh/</loc>
+    <lastmod>2021-10-04T19:16:56+09:00</lastmod>
+  </url><url>
+    <loc>http://blog.cro.sh/posts/</loc>
+    <lastmod>2021-10-04T19:16:56+09:00</lastmod>
+  </url><url>
     <loc>http://blog.cro.sh/posts/cs6265-epilogue/</loc>
     <lastmod>2021-02-14T16:44:32+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://blog.cro.sh/</loc>
-    <lastmod>2021-02-14T16:44:32+09:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>http://blog.cro.sh/posts/</loc>
-    <lastmod>2021-02-14T16:44:32+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>http://blog.cro.sh/posts/rust-crosscompile-aarch64/</loc>
     <lastmod>2020-04-04T21:50:17+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>http://blog.cro.sh/posts/embedding-wasm-in-html/</loc>
     <lastmod>2020-02-23T17:57:08+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>http://blog.cro.sh/posts/pi-zero-buildroot/</loc>
     <lastmod>2019-12-01T19:19:27+09:00</lastmod>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>http://blog.cro.sh/categories/</loc>
-  </url>
-  
-  <url>
+  </url><url>
     <loc>http://blog.cro.sh/tags/</loc>
   </url>
-  
 </urlset>

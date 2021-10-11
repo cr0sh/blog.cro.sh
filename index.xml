@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Option::None</title>
     <link>http://blog.cro.sh/</link>
     <description>Recent content on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
-    <lastBuildDate>Sun, 14 Feb 2021 16:44:32 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright>
+    <lastBuildDate>Mon, 04 Oct 2021 19:16:56 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Cloudflare Workers Rust SDK 사용기</title>
+      <link>http://blog.cro.sh/posts/cloudflare-workers-rust/</link>
+      <pubDate>Mon, 04 Oct 2021 19:16:56 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/cloudflare-workers-rust/</guid>
+      <description>&lt;p&gt;Workers는 Cloudflare사의 서버리스 컴퓨팅 서비스로, 전세계의 수많은 Cloudflare Edge 네트워크를
+통해 빠른 반응속도로 응답할 수 있는 매력적인 서비스다. Workers 코드를 Rust로 작성해보면서 느낀 점을
+공유해보고자 한다.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>CS6265 Epilogue</title>
       <link>http://blog.cro.sh/posts/cs6265-epilogue/</link>
