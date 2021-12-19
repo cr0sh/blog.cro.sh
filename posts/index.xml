@@ -7,7 +7,18 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright>
-    <lastBuildDate>Mon, 04 Oct 2021 19:16:56 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 19 Dec 2021 11:32:19 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>파이로 파이 Pico 디버깅하기 (w/ buildroot)</title>
+      <link>http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/</link>
+      <pubDate>Sun, 19 Dec 2021 11:32:19 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/</guid>
+      <description>&lt;p&gt;라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서,
+가지고 있던 라즈베리 파이 3을 이용해보기로 했다. 최대한 미니멀한 환경을 원했기 때문에 예전과 같이
+Buildroot을 사용하여 구성하였다.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Cloudflare Workers Rust SDK 사용기</title>
       <link>http://blog.cro.sh/posts/cloudflare-workers-rust/</link>

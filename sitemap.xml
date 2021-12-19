@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://blog.cro.sh/posts/cloudflare-workers-rust/</loc>
-    <lastmod>2021-10-04T19:16:56+09:00</lastmod>
-  </url><url>
     <loc>http://blog.cro.sh/</loc>
-    <lastmod>2021-10-04T19:16:56+09:00</lastmod>
+    <lastmod>2021-12-19T11:32:19+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/posts/</loc>
+    <lastmod>2021-12-19T11:32:19+09:00</lastmod>
+  </url><url>
+    <loc>http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/</loc>
+    <lastmod>2021-12-19T11:32:19+09:00</lastmod>
+  </url><url>
+    <loc>http://blog.cro.sh/posts/cloudflare-workers-rust/</loc>
     <lastmod>2021-10-04T19:16:56+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/posts/cs6265-epilogue/</loc>
