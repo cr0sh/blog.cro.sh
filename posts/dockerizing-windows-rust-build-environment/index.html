@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Windows에서 Rust 빌드 환경 컨테이너화하기 | Option::None</title>
+<meta name="keywords" content="" />
+<meta name="description" content="CD 등을 위해 Rust 빌드 환경을 Docker Hub의 공식 Rust 이미지를
+기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의
+빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드
+환경을 구성하는 법을 다룰 것이다.">
+<meta name="author" content="">
+<link rel="canonical" href="http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/" />
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://blog.cro.sh/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://blog.cro.sh/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://blog.cro.sh/apple-touch-icon.png">
+<link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<meta name="generator" content="Hugo 0.92.2" />
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Windows에서 Rust 빌드 환경 컨테이너화하기" />
+<meta property="og:description" content="CD 등을 위해 Rust 빌드 환경을 Docker Hub의 공식 Rust 이미지를
+기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의
+빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드
+환경을 구성하는 법을 다룰 것이다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-02-20T21:25:34&#43;09:00" />
+<meta property="article:modified_time" content="2022-02-20T21:25:34&#43;09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Windows에서 Rust 빌드 환경 컨테이너화하기"/>
+<meta name="twitter:description" content="CD 등을 위해 Rust 빌드 환경을 Docker Hub의 공식 Rust 이미지를
+기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의
+빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드
+환경을 구성하는 법을 다룰 것이다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://blog.cro.sh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Windows에서 Rust 빌드 환경 컨테이너화하기",
+      "item": "http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Windows에서 Rust 빌드 환경 컨테이너화하기",
+  "name": "Windows에서 Rust 빌드 환경 컨테이너화하기",
+  "description": "CD 등을 위해 Rust 빌드 환경을 Docker Hub의 공식 Rust 이미지를 기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의 빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드 환경을 구성하는 법을 다룰 것이다.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "CD 등을 위해 Rust 빌드 환경을 Docker Hub의 공식 Rust 이미지를 기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의 빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드 환경을 구성하는 법을 다룰 것이다.\n참고한 문서 목록  https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022 https://mcr.microsoft.com/v2/dotnet/framework/sdk/tags/list (Microsoft Container Registry의 .NET 이미지 태그 목록)  Dockerfile # escape=`FROMmcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-20H2WORKDIRC:\\\\buildRUN ` # Download the Build Tools bootstrapper. curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe ` ` # Install Build Tools with the Microsoft.VisualStudio.Workload.AzureBuildTools workload, excluding workloads and components with known issues. \u0026\u0026 (start /w vs_buildtools.exe --quiet --wait --norestart --nocache modify ` --installPath \"%ProgramFiles(x86)%\\Microsoft Visual Studio\\2022\\BuildTools\" ` --add Microsoft.VisualStudio.Workload.VCTools ` --add Microsoft.VisualStudio.Component.CoreBuildTools ` --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ` --add Microsoft.VisualStudio.Component.VC.CoreBuildTools ` --add Microsoft.VisualStudio.Component.Windows10SDK.19041 ` || IF \"%ERRORLEVEL%\"==\"3010\" EXIT 0) ` ` # Cleanup \u0026\u0026 del /q vs_buildtools.exeRUN ` powershell -Command \"(Invoke-WebRequest -OutFile rustup-init.exe https://win.rustup.rs/x86_64) ` ; (./rustup-init.exe --default-toolchain nightly-2022-02-20 -y --profile minimal) ` ; rm ./rustup-init.exe\"RUN mkdir C:\\\\mountCOPY build_isolated.ps1 .ENTRYPOINT [ \"powershell\", \"-Command\", \"./build_isolated.ps1\" ]build-isolated.ps1 $mnt = $args[0].Trim() Copy-Item $mnt/* . -Recurse -Force -Exclude $mnt/target cargo build --release --features windows_subsystem Copy-Item target/release/.exe $mnt/output.exe echo Done Gotchas  Docker Desktop의 기본 설정은 WSL2인데 여기서는 리눅스 이미지만 사용할 수 있다. Windows 컨테이너를 사용할 수 있도록 Hyper-V 백엔드로 바꿔야 한다. 내가 사용하는 Host OS는 Windows 10 21H2(빌드 19044)인데, 여기서는 ltsc2022 이미지를 실행할 수 없었다. Windows 11로 업그레이드할 때까지만 임시로 20H2 이미지를 사용하기로 했다. vs_buildtools.exe는 .NET 프레임워크를 필요로 하는 것으로 보인다. (확실하지 않음). Windows Server Core와 같은 이미지에서는 잘 작동하지 않았다. Windows 10 SDK와 Core Build Tools가 있어야 rustc가 link.exe 링커를 사용할 ㅅ ㅜ있다. 기본 상태에서는 Hyper-V 이미지가 2개의 CPU 코어만 사용하는 것으로 보인다. Issue #1877 수동으로 --cpu-count 옵션을 주면 해결된다. ",
+  "wordCount" : "267",
+  "inLanguage": "en",
+  "datePublished": "2022-02-20T21:25:34+09:00",
+  "dateModified": "2022-02-20T21:25:34+09:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Option::None",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://blog.cro.sh/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
+            <span class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </span>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Windows에서 Rust 빌드 환경 컨테이너화하기
+    </h1>
+    <div class="post-meta">February 20, 2022
+</div>
+  </header> 
+  <div class="post-content"><p>CD 등을 위해 Rust 빌드 환경을 <a href="https://hub.docker.com/_/rust">Docker Hub의 공식 Rust 이미지</a>를
+기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의
+빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드
+환경을 구성하는 법을 다룰 것이다.</p>
+<h1 id="참고한-문서-목록">참고한 문서 목록<a hidden class="anchor" aria-hidden="true" href="#참고한-문서-목록">#</a></h1>
+<ul>
+<li><a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images">https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images</a></li>
+<li><a href="https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022">https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022</a></li>
+<li><a href="https://mcr.microsoft.com/v2/dotnet/framework/sdk/tags/list">https://mcr.microsoft.com/v2/dotnet/framework/sdk/tags/list</a> (Microsoft Container Registry의 .NET 이미지 태그 목록)</li>
+</ul>
+<h1 id="dockerfile"><code>Dockerfile</code><a hidden class="anchor" aria-hidden="true" href="#dockerfile">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#75715e"># escape=`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/dotnet/framework/sdk:4.8-windowsservercore-20H2</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> C:\\build</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#75715e"># Download the Build Tools bootstrapper.</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    curl -SL --output vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#75715e"># Install Build Tools with the Microsoft.VisualStudio.Workload.AzureBuildTools workload, excluding workloads and components with known issues.</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#f92672">&amp;&amp;</span> <span style="color:#f92672">(</span>start /w vs_buildtools.exe --quiet --wait --norestart --nocache modify <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    --installPath <span style="color:#e6db74">&#34;%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools&#34;</span> <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    --add Microsoft.VisualStudio.Workload.VCTools <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    --add Microsoft.VisualStudio.Component.CoreBuildTools <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    --add Microsoft.VisualStudio.Component.VC.CoreBuildTools <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    --add Microsoft.VisualStudio.Component.Windows10SDK.19041 <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#f92672">||</span> IF <span style="color:#e6db74">&#34;%ERRORLEVEL%&#34;</span><span style="color:#f92672">==</span><span style="color:#e6db74">&#34;3010&#34;</span> EXIT 0<span style="color:#f92672">)</span> <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#75715e"># Cleanup</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    <span style="color:#f92672">&amp;&amp;</span> del /q vs_buildtools.exe<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    powershell -Command <span style="color:#e6db74">&#34;(Invoke-WebRequest -OutFile rustup-init.exe https://win.rustup.rs/x86_64) `</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    ; <span style="color:#f92672">(</span>./rustup-init.exe --default-toolchain nightly-2022-02-20 -y --profile minimal<span style="color:#f92672">)</span> <span style="color:#e6db74">`</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>    ; rm ./rustup-init.exe<span style="color:#e6db74">&#34;</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> mkdir C:<span style="color:#ae81ff">\\</span>mount<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> build_isolated.ps1 .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;powershell&#34;</span>, <span style="color:#e6db74">&#34;-Command&#34;</span>, <span style="color:#e6db74">&#34;./build_isolated.ps1&#34;</span> ]<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><h1 id="build-isolatedps1"><code>build-isolated.ps1</code><a hidden class="anchor" aria-hidden="true" href="#build-isolatedps1">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-powershell" data-lang="powershell">$mnt = $args[0].Trim()
+Copy-Item $mnt/* . -Recurse -Force -Exclude $mnt/target
+cargo build --release --features windows_subsystem
+Copy-Item target/release/&lt;crate-name&gt;.exe $mnt/output.exe
+echo Done
+</code></pre></div><h1 id="gotchas">Gotchas<a hidden class="anchor" aria-hidden="true" href="#gotchas">#</a></h1>
+<ul>
+<li>Docker Desktop의 기본 설정은 WSL2인데 여기서는 리눅스 이미지만 사용할 수 있다.
+Windows 컨테이너를 사용할 수 있도록 Hyper-V 백엔드로 바꿔야 한다.</li>
+<li>내가 사용하는 Host OS는 Windows 10 21H2(빌드 19044)인데, 여기서는 <code>ltsc2022</code> 이미지를 실행할 수 없었다.
+Windows 11로 업그레이드할 때까지만 임시로 20H2 이미지를 사용하기로 했다.</li>
+<li><code>vs_buildtools.exe</code>는 .NET 프레임워크를 필요로 하는 것으로 보인다. (확실하지 않음). Windows Server Core와
+같은 이미지에서는 잘 작동하지 않았다.</li>
+<li>Windows 10 SDK와 Core Build Tools가 있어야 <code>rustc</code>가 <code>link.exe</code> 링커를 사용할 ㅅ ㅜ있다.</li>
+<li>기본 상태에서는 Hyper-V 이미지가 2개의 CPU 코어만 사용하는 것으로 보인다. <a href="https://github.com/docker/for-win/issues/1877">Issue #1877</a>
+수동으로 <code>--cpu-count</code> 옵션을 주면 해결된다.</li>
+</ul>
+
+  </div>
+
+  <footer class="post-footer">
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>© 2019-2021 Nam Junghyun</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+    menu.onscroll = function () {
+        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
