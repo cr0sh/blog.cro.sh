@@ -13,7 +13,7 @@
 <meta name="author" content="">
 <link rel="canonical" href="http://blog.cro.sh/posts/cloudflare-workers-rust/" />
 <link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.4dcb3c4f38462f66c6b6137227726f5543cb934cca9788f041c087e374491df2.js" integrity="sha256-Tcs8TzhGL2bGthNyJ3JvVUPLk0zKl4jwQcCH43RJHfI="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
@@ -22,7 +22,7 @@
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<meta name="generator" content="Hugo 0.92.2" />
+<meta name="generator" content="Hugo 0.93.0" />
 <noscript>
     <style>
         #theme-toggle,
@@ -105,7 +105,7 @@
   "keywords": [
     
   ],
-  "articleBody": "Workers는 Cloudflare사의 서버리스 컴퓨팅 서비스로, 전세계의 수많은 Cloudflare Edge 네트워크를 통해 빠른 반응속도로 응답할 수 있는 매력적인 서비스다. Workers 코드를 Rust로 작성해보면서 느낀 점을 공유해보고자 한다.\nDisclaimer 이 포스트가 작성된 시점에서 workers-rs 패키지의 버전은 0.0.6으로, 빠진 기능이 많고 API도 계속해서 추가/변경되고 있다. 이후에는 이 포스트의 내용이 잘 맞지 않을 수 있으니 실제 documentation을 확인하기 바란다.\n서버리스 컴퓨팅? 서버리스 컴퓨팅은 특정 서버에 코드를 올려놓고 요청을 처리하는 것이 아니라, 말 그대로 어떤 서버에 종속되지 않은(serverless) 코드를 배포하여 필요할 때마다 요청을 처리하는 기술이다.\n기존의 서버-종속적인 컴퓨팅 모델과 비교해 서버리스 컴퓨팅은 다음과 같은 이점을 가진다.\n  비용 절감: 대부분의 서버리스 서비스는 해당 코드가 ‘실제로 사용한’ 자원(CPU, 메모리, 네트워크)에 대해서만 요금을 부과한다. 기존의 서버-종속적인 컴퓨팅 모델은 요청이 들어오지 않아도 해당 코드가 서버를 계속 점유하고 있어야 하지만, 서버리스 컴퓨팅의 경우에는 요청이 들어올 때만 대응되는 코드를 실행하고 남는 시간에는 다른 요청에 대해 코드를 실행하는 식으로 자원을 공유할 수 있기 때문에 운영사 입장에서는 쓴 만큼만 요금을 부과할 수 있다.\n  자동 스케일 조정: 특정 요청이 몰릴 때 더 많은 서버에서 같은 코드를 실행하도록 자동적으로 확장/축소할 수 있다.\n  개발 기간 단축: 대부분의 서버리스 서비스는 REST 엔드포인트처럼 동작하므로 HTTP 서버를 구성하거나 하는 시간적 비용을 줄일 수 있다. 또한 서버리스 코드는 태생적으로 ‘stateless’하기도 하므로(하지만 workers에서는 stateless가 아니긴 하다. :P) 프로그래머는 로직과 상태를 분리할 수 있게 된다.\n  Cloudflare Workers Workers를 사용하면 기존 서버리스 서비스인 AWS Lambda, GCP Functions와 비교하여 다음과 같은 장점이 있다고 한다.\n 타사에 비해 폭넓은 에지 수: Cloudflare의 데이터센터가 더 많으니 전세계 범위에서 평균적인 레이턴시가 더 적다고 주장한다. (자기 나라에 있을 확률이 높으니까) Cold start 없음: 타사 서비스는 일정 시간동안 코드가 실행되지 않으면 다음의 첫 실행이 오래 걸리는데 Workers의 경우 이러한 문제가 없다고 한다. Rust 공식 지원  특히, (무료 제공량 기준) CPU time으로 요청당 50ms씩 제공한다는 사실이 특이했다. 다른 서비스와 달리 I/O 시간은 측정하지 않겠다는 뜻이다.\n(From https://developers.cloudflare.com/workers/learning/how-workers-works#isolates)\n구조상으로 특기할 점은, 수행하려는 코드마다 프로세스를 띄우는 다른 서버리스 서비스와 달리 Workers는 V8 런타임을 공유하되 서로 격리된 공간 안에서 여러 코드를 동시에 실행한다는 것이다. 이를 통해 startup 시간을 대폭 줄이고 CPU time에 대해서만 과금할 수 있는 것으로 추정된다. (I/O 중에는 async하게 다른 코드를 실행하면 낭비가 없으므로)\nworkers-rs \nCloudflare Workers의 Rust SDK이다. 다음과 같은 기능을 지원한다.\nRouting Workers 코드는 일종의 웹 서버처럼 동작하기 때문에 기존의 백엔드 코드와 비슷한 모양새를 갖추게 된다.\nuse worker::*; #[event(fetch)] pub async fn main(req: Request, env: Env) - ResultResponse { let router = Router::new(); console_log!(\"{:?}\", \u0026req); // console.log로 출력된 로그는 Workers Dashboard에 실시간으로 표시된다.  router .get_async(\"/:foo/:bar\", handler) // foo, bar argument를 캡쳐할 수 있다  .run(req, env) .await } async fn handler(req: Request, ctx: RouteContext()) - ResultResponse { if let Some(key) = ctx.param(\"foo\") { // Path argument `foo`를 가져옴  Response::ok(\"Hello\".to_string()) // .with_headers(headers) // Response header도 설정할 수 있다.  } } Workers KV GET/PUT/DELETE를 지원하는 간단한 KV 스토리지다. Workers에 배포된 코드는 전세계의 엣지에서 실행되기 때문에 KV도 완벽한 일관성(consistency) 을 보장하지 않는다. 모든 엣지에 변경사항이 전파되는 데 최대 1분 걸릴 수 있다고 한다. KV의 value에는 만료 시간(TTL)과 메타데이터를 추가로 지정할 수 있다.\nlet kv = ctx.kv(\"foo\")?; kv.put(\u0026hashed_key, body)? .expiration_ttl(ttl) .execute(); Durable Objects Workers 코드에 state를 부여할 수 있는 방법이라고 하는데, 아직은 사용해보지 않았다(결정적인 이유로 KV와 다르게 이쪽은 free plan이 없다. miniflare와 같은 도구로 로컬에서 시험해볼 수는 있어보인다.)\n토이 서비스: 메이플스토리 설정 연동 (https://pc.cro.sh) Rust SDK를 사용한 프로젝트로 메이플스토리 게임의 설정을 저장하여 업로드/다운로드하는 간단한 서비스를 제작하였다. 메이플스토리는 게임 설정을 HKLM\\SOFTWARE\\WOW6432Node\\Wizet\\MapleStory 레지스트리 키 아래에 모두 저장하기 때문에 Windows의 reg export 명령어로 쉽게 추출이 가능하다. 주 목적은 PC방에서 추출한 설정을 다운로드받아서 게임을 켜기 전에 설정을 연동해두는 것이다.\n소스코드는 Github public repo로 공개되어 있다. https://github.com/cr0sh/pc.cro.sh\n내부 로직: Rust (Webassembly) 최대한의 보안성을 위해 KV상에 저장/다운로드될 게임 설정은 클라이언트단에서 암호화/복호화를 수행해야 한다. 이는 최대한의 성능을 위해 Rust로 작성하여 Webassembly로 컴파일하여 프론트엔드에 탑재하였다.\n프론트엔드: React(TSX/Functional Components) + Material-UI 4.0 Typescript도 복습할 겸 리액트로 프론트엔드를 구성했다. UI에는 기존에 사용해봤던 MUI를 사용해서 무난한 look-and-feel을 구성했다. 다음과 같은 일을 수행한다.\n 업로드 폼/다운로드 폼 구성 업로드할 설정 파일 검증 및 암호화(AES-256) Fetch API를 사용하여 업로드/다운로드(reqwest 사용) 다운로드한 설정 파일 복호화 및 옵션 조정  최근에 메모리 할당량 설정이 추가되었는데, 이는 사용하려는 PC의 사양에 맞춰 설정해야 하므로 다운로드 UI에 포함시켜 자동으로 조절하도록 하였다. Device Memory API를 사용하면 대략적인 컴퓨터의 메모리 크기를 추측할 수 있어 도움이 된다.  아쉽게도 Firefox/IE에서는 지원하지 않는다.      시범적으로 Google의 reCAPTCHA v3도 적용해보았는데, react-google-recaptcha-v3 패키지를 사용하니 정말 간단하게 적용할 수 있었다.\n백엔드: workers-rs Workers SDK를 시험해보는 게 목적이니 당연히 위에 설명된 worker가 기반이 된다.\n PUT 리퀘스트 처리: reCAPTCHA 토큰을 검증하고 KV에 주어진 설정 파일을 저장한다. GET 리퀘스트 처리: reCAPTCHA 토큰을 검증하고 KV에서 주어진 설정 파일을 가져온다.  클라이언트단에서 대부분의 로직을 담당하기 때문에(보안성을 위해), 백엔드가 할 일은 사실상 단순한 KV API의 래핑 처리일 뿐이다. 그러나 workers-rs가 아직 구현이 덜 되어있어서 다음과 같은 추가적인 처리가 필요했다.\n CORS 고려가 되어있지 않아 보인다. CORS preflight(HTTP OPTIONS 리퀘스트)에 대한 핸들링이 필요하고 응답 시에 헤더에도 Allow-Origin 헤더를 적절히 넣어줘야 한다.  trait Cors { fn cors(self, req: \u0026Request) - ResultResponse; } impl Cors for Response { fn cors(self, req: \u0026Request) - ResultResponse { static ALLOWED_ORIGINS: \u0026[\u0026str] = \u0026[\"http://localhost:3000\", \"https://pc.cro.sh\"]; let mut cors_header = Headers::new(); if let Some(origin) = req.headers().get(\"Origin\")? { if ALLOWED_ORIGINS.iter().find(|\u0026\u0026x| x == origin).is_some() { cors_header.append(\"Access-Control-Allow-Origin\", \u0026origin)?; } } Ok(self.with_headers(cors_header)) } } // Usage example: Response::error(\"Bad Request\", 400)?.cors(\u0026req)   문제는 이것이 사용자 코드 레벨에서 처리되었기 때문에 unhandled exception 등이 발생하면 응답 헤더의 래핑이 되지 않고 브라우저 입장에서 CORS 요청이 실패했다는 결과만 받게 된다. Catch-all 패턴 등을 통해 추가적으로 코드를 감싸야 하는 것이다.\n  또한, KV에 대응되는 API(worker-kv crate)가 아직 미완성이다. Text payload만 지원하기 때문에 넣고 뺄 때 base64 인코딩을 거쳐야 했다. 거치지 않고 직접 바이너리 페이로드를 집어넣으려면 직접 js_sys 바인딩을 통해 raw API에 접근해야 한다.\n Update: worker-kv 0.4.0에서 [u8] 타입도 지원하는 것으로 보인다.    후기 아직 workers-rs는 v0.1도 달성하지 않았기 때문에 개선의 여지가 많다. 앞서 언급한 엣지 케이스들에 대한 처리가 아직 완벽하지 않기 때문에 당장 실사용하기에는 어렵지만, 빠르게 발전하고 있기 때문에 앞으로 Rust로 강력한 서버리스 서비스를 제작할 수 있는 선택지가 하나 더 늘어나기를 기대한다.\n개인적인 의견으로 네이티브하게 Rust 코드가 실행되는 것이 아니라 Webassembly로 컴파일되어 동작하기 때문에 CPU-bound한 로직의 성능을 최대한 뽑기 위해 사용하는 목적보다는(특히 무료 버전에서는 CPU-time을 아주 짧게 제공하는 대신 I/O 등에 걸리는 시간을 계산하지 않는 모델임을 생각해보자) 기존의 Rust 코드베이스를 클라우드로 이전하기 쉽다는 점을 포인트로 잡고 홍보해야 할 것 같다. 이런 방향에서는 기존의 Actix/Warp/Tide와 같은 웹 프레임워크에 대한 migration을 최대한 잘 지원해야 할 것이다.\n",
+  "articleBody": "Workers는 Cloudflare사의 서버리스 컴퓨팅 서비스로, 전세계의 수많은 Cloudflare Edge 네트워크를 통해 빠른 반응속도로 응답할 수 있는 매력적인 서비스다. Workers 코드를 Rust로 작성해보면서 느낀 점을 공유해보고자 한다.\nDisclaimer 이 포스트가 작성된 시점에서 workers-rs 패키지의 버전은 0.0.6으로, 빠진 기능이 많고 API도 계속해서 추가/변경되고 있다. 이후에는 이 포스트의 내용이 잘 맞지 않을 수 있으니 실제 documentation을 확인하기 바란다.\n서버리스 컴퓨팅? 서버리스 컴퓨팅은 특정 서버에 코드를 올려놓고 요청을 처리하는 것이 아니라, 말 그대로 어떤 서버에 종속되지 않은(serverless) 코드를 배포하여 필요할 때마다 요청을 처리하는 기술이다.\n기존의 서버-종속적인 컴퓨팅 모델과 비교해 서버리스 컴퓨팅은 다음과 같은 이점을 가진다.\n  비용 절감: 대부분의 서버리스 서비스는 해당 코드가 ‘실제로 사용한’ 자원(CPU, 메모리, 네트워크)에 대해서만 요금을 부과한다. 기존의 서버-종속적인 컴퓨팅 모델은 요청이 들어오지 않아도 해당 코드가 서버를 계속 점유하고 있어야 하지만, 서버리스 컴퓨팅의 경우에는 요청이 들어올 때만 대응되는 코드를 실행하고 남는 시간에는 다른 요청에 대해 코드를 실행하는 식으로 자원을 공유할 수 있기 때문에 운영사 입장에서는 쓴 만큼만 요금을 부과할 수 있다.\n  자동 스케일 조정: 특정 요청이 몰릴 때 더 많은 서버에서 같은 코드를 실행하도록 자동적으로 확장/축소할 수 있다.\n  개발 기간 단축: 대부분의 서버리스 서비스는 REST 엔드포인트처럼 동작하므로 HTTP 서버를 구성하거나 하는 시간적 비용을 줄일 수 있다. 또한 서버리스 코드는 태생적으로 ‘stateless’하기도 하므로(하지만 workers에서는 stateless가 아니긴 하다. :P) 프로그래머는 로직과 상태를 분리할 수 있게 된다.\n  Cloudflare Workers Workers를 사용하면 기존 서버리스 서비스인 AWS Lambda, GCP Functions와 비교하여 다음과 같은 장점이 있다고 한다.\n 타사에 비해 폭넓은 에지 수: Cloudflare의 데이터센터가 더 많으니 전세계 범위에서 평균적인 레이턴시가 더 적다고 주장한다. (자기 나라에 있을 확률이 높으니까) Cold start 없음: 타사 서비스는 일정 시간동안 코드가 실행되지 않으면 다음의 첫 실행이 오래 걸리는데 Workers의 경우 이러한 문제가 없다고 한다. Rust 공식 지원  특히, (무료 제공량 기준) CPU time으로 요청당 50ms씩 제공한다는 사실이 특이했다. 다른 서비스와 달리 I/O 시간은 측정하지 않겠다는 뜻이다.\n(From https://developers.cloudflare.com/workers/learning/how-workers-works#isolates)\n구조상으로 특기할 점은, 수행하려는 코드마다 프로세스를 띄우는 다른 서버리스 서비스와 달리 Workers는 V8 런타임을 공유하되 서로 격리된 공간 안에서 여러 코드를 동시에 실행한다는 것이다. 이를 통해 startup 시간을 대폭 줄이고 CPU time에 대해서만 과금할 수 있는 것으로 추정된다. (I/O 중에는 async하게 다른 코드를 실행하면 낭비가 없으므로)\nworkers-rs \nCloudflare Workers의 Rust SDK이다. 다음과 같은 기능을 지원한다.\nRouting Workers 코드는 일종의 웹 서버처럼 동작하기 때문에 기존의 백엔드 코드와 비슷한 모양새를 갖추게 된다.\nuse worker::*;   #[event(fetch)] pub async fn main(req: Request, env: Env) - ResultResponse {  let router = Router::new();   console_log!(\"{:?}\", \u0026req); // console.log로 출력된 로그는 Workers Dashboard에 실시간으로 표시된다.   router  .get_async(\"/:foo/:bar\", handler) // foo, bar argument를 캡쳐할 수 있다  .run(req, env)  .await }  async fn handler(req: Request, ctx: RouteContext()) - ResultResponse {  if let Some(key) = ctx.param(\"foo\") { // Path argument `foo`를 가져옴  Response::ok(\"Hello\".to_string())  // .with_headers(headers) // Response header도 설정할 수 있다.  } } Workers KV GET/PUT/DELETE를 지원하는 간단한 KV 스토리지다. Workers에 배포된 코드는 전세계의 엣지에서 실행되기 때문에 KV도 완벽한 일관성(consistency) 을 보장하지 않는다. 모든 엣지에 변경사항이 전파되는 데 최대 1분 걸릴 수 있다고 한다. KV의 value에는 만료 시간(TTL)과 메타데이터를 추가로 지정할 수 있다.\nlet kv = ctx.kv(\"foo\")?; kv.put(\u0026hashed_key, body)?  .expiration_ttl(ttl)  .execute(); Durable Objects Workers 코드에 state를 부여할 수 있는 방법이라고 하는데, 아직은 사용해보지 않았다(결정적인 이유로 KV와 다르게 이쪽은 free plan이 없다. miniflare와 같은 도구로 로컬에서 시험해볼 수는 있어보인다.)\n토이 서비스: 메이플스토리 설정 연동 (https://pc.cro.sh) Rust SDK를 사용한 프로젝트로 메이플스토리 게임의 설정을 저장하여 업로드/다운로드하는 간단한 서비스를 제작하였다. 메이플스토리는 게임 설정을 HKLM\\SOFTWARE\\WOW6432Node\\Wizet\\MapleStory 레지스트리 키 아래에 모두 저장하기 때문에 Windows의 reg export 명령어로 쉽게 추출이 가능하다. 주 목적은 PC방에서 추출한 설정을 다운로드받아서 게임을 켜기 전에 설정을 연동해두는 것이다.\n소스코드는 Github public repo로 공개되어 있다. https://github.com/cr0sh/pc.cro.sh\n내부 로직: Rust (Webassembly) 최대한의 보안성을 위해 KV상에 저장/다운로드될 게임 설정은 클라이언트단에서 암호화/복호화를 수행해야 한다. 이는 최대한의 성능을 위해 Rust로 작성하여 Webassembly로 컴파일하여 프론트엔드에 탑재하였다.\n프론트엔드: React(TSX/Functional Components) + Material-UI 4.0 Typescript도 복습할 겸 리액트로 프론트엔드를 구성했다. UI에는 기존에 사용해봤던 MUI를 사용해서 무난한 look-and-feel을 구성했다. 다음과 같은 일을 수행한다.\n 업로드 폼/다운로드 폼 구성 업로드할 설정 파일 검증 및 암호화(AES-256) Fetch API를 사용하여 업로드/다운로드(reqwest 사용) 다운로드한 설정 파일 복호화 및 옵션 조정  최근에 메모리 할당량 설정이 추가되었는데, 이는 사용하려는 PC의 사양에 맞춰 설정해야 하므로 다운로드 UI에 포함시켜 자동으로 조절하도록 하였다. Device Memory API를 사용하면 대략적인 컴퓨터의 메모리 크기를 추측할 수 있어 도움이 된다.  아쉽게도 Firefox/IE에서는 지원하지 않는다.      시범적으로 Google의 reCAPTCHA v3도 적용해보았는데, react-google-recaptcha-v3 패키지를 사용하니 정말 간단하게 적용할 수 있었다.\n백엔드: workers-rs Workers SDK를 시험해보는 게 목적이니 당연히 위에 설명된 worker가 기반이 된다.\n PUT 리퀘스트 처리: reCAPTCHA 토큰을 검증하고 KV에 주어진 설정 파일을 저장한다. GET 리퀘스트 처리: reCAPTCHA 토큰을 검증하고 KV에서 주어진 설정 파일을 가져온다.  클라이언트단에서 대부분의 로직을 담당하기 때문에(보안성을 위해), 백엔드가 할 일은 사실상 단순한 KV API의 래핑 처리일 뿐이다. 그러나 workers-rs가 아직 구현이 덜 되어있어서 다음과 같은 추가적인 처리가 필요했다.\n CORS 고려가 되어있지 않아 보인다. CORS preflight(HTTP OPTIONS 리퀘스트)에 대한 핸들링이 필요하고 응답 시에 헤더에도 Allow-Origin 헤더를 적절히 넣어줘야 한다.   trait Cors {  fn cors(self, req: \u0026Request) - ResultResponse; }  impl Cors for Response {  fn cors(self, req: \u0026Request) - ResultResponse {  static ALLOWED_ORIGINS: \u0026[\u0026str] = \u0026[\"http://localhost:3000\", \"https://pc.cro.sh\"];   let mut cors_header = Headers::new();  if let Some(origin) = req.headers().get(\"Origin\")? {  if ALLOWED_ORIGINS.iter().find(|\u0026\u0026x| x == origin).is_some() {  cors_header.append(\"Access-Control-Allow-Origin\", \u0026origin)?;  }  }   Ok(self.with_headers(cors_header))  } }  // Usage example: Response::error(\"Bad Request\", 400)?.cors(\u0026req)   문제는 이것이 사용자 코드 레벨에서 처리되었기 때문에 unhandled exception 등이 발생하면 응답 헤더의 래핑이 되지 않고 브라우저 입장에서 CORS 요청이 실패했다는 결과만 받게 된다. Catch-all 패턴 등을 통해 추가적으로 코드를 감싸야 하는 것이다.\n  또한, KV에 대응되는 API(worker-kv crate)가 아직 미완성이다. Text payload만 지원하기 때문에 넣고 뺄 때 base64 인코딩을 거쳐야 했다. 거치지 않고 직접 바이너리 페이로드를 집어넣으려면 직접 js_sys 바인딩을 통해 raw API에 접근해야 한다.\n Update: worker-kv 0.4.0에서 [u8] 타입도 지원하는 것으로 보인다.    후기 아직 workers-rs는 v0.1도 달성하지 않았기 때문에 개선의 여지가 많다. 앞서 언급한 엣지 케이스들에 대한 처리가 아직 완벽하지 않기 때문에 당장 실사용하기에는 어렵지만, 빠르게 발전하고 있기 때문에 앞으로 Rust로 강력한 서버리스 서비스를 제작할 수 있는 선택지가 하나 더 늘어나기를 기대한다.\n개인적인 의견으로 네이티브하게 Rust 코드가 실행되는 것이 아니라 Webassembly로 컴파일되어 동작하기 때문에 CPU-bound한 로직의 성능을 최대한 뽑기 위해 사용하는 목적보다는(특히 무료 버전에서는 CPU-time을 아주 짧게 제공하는 대신 I/O 등에 걸리는 시간을 계산하지 않는 모델임을 생각해보자) 기존의 Rust 코드베이스를 클라우드로 이전하기 쉽다는 점을 포인트로 잡고 홍보해야 할 것 같다. 이런 방향에서는 기존의 Actix/Warp/Tide와 같은 웹 프레임워크에 대한 migration을 최대한 잘 지원해야 할 것이다.\n",
   "wordCount" : "991",
   "inLanguage": "en",
   "datePublished": "2021-10-04T19:16:56+09:00",
@@ -225,35 +225,35 @@
 <p>Cloudflare Workers의 Rust SDK이다. 다음과 같은 기능을 지원한다.</p>
 <h3 id="routing">Routing<a hidden class="anchor" aria-hidden="true" href="#routing">#</a></h3>
 <p>Workers 코드는 일종의 웹 서버처럼 동작하기 때문에 기존의 백엔드 코드와 비슷한 모양새를 갖추게 된다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">use</span> worker::<span style="color:#f92672">*</span>;
-
-
-<span style="color:#75715e">#[event(fetch)]</span>
-<span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">main</span>(req: <span style="color:#a6e22e">Request</span>, env: <span style="color:#a6e22e">Env</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span> {
-    <span style="color:#66d9ef">let</span> router <span style="color:#f92672">=</span> Router::new();
-
-    console_log<span style="color:#f92672">!</span>(<span style="color:#e6db74">&#34;{:?}&#34;</span>, <span style="color:#f92672">&amp;</span>req); <span style="color:#75715e">// console.log로 출력된 로그는 Workers Dashboard에 실시간으로 표시된다.
-</span><span style="color:#75715e"></span>
-    router
-        .get_async(<span style="color:#e6db74">&#34;/:foo/:bar&#34;</span>, handler) <span style="color:#75715e">// foo, bar argument를 캡쳐할 수 있다
-</span><span style="color:#75715e"></span>        .run(req, env)
-        .<span style="color:#66d9ef">await</span>
-}
-
-<span style="color:#66d9ef">async</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">handler</span>(req: <span style="color:#a6e22e">Request</span>, ctx: <span style="color:#a6e22e">RouteContext</span><span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span> {
-    <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(key) <span style="color:#f92672">=</span> ctx.param(<span style="color:#e6db74">&#34;foo&#34;</span>) { <span style="color:#75715e">// Path argument `foo`를 가져옴
-</span><span style="color:#75715e"></span>        Response::ok(<span style="color:#e6db74">&#34;Hello&#34;</span>.to_string())
-        <span style="color:#75715e">// .with_headers(headers) // Response header도 설정할 수 있다.
-</span><span style="color:#75715e"></span>    }
-}
-</code></pre></div><h3 id="workers-kvhttpswwwcloudflarecomko-krproductsworkers-kv"><a href="https://www.cloudflare.com/ko-kr/products/workers-kv/">Workers KV</a><a hidden class="anchor" aria-hidden="true" href="#workers-kvhttpswwwcloudflarecomko-krproductsworkers-kv">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> worker::<span style="color:#f92672">*</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[event(fetch)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">main</span>(req: <span style="color:#a6e22e">Request</span>, env: <span style="color:#a6e22e">Env</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> router <span style="color:#f92672">=</span> Router::new();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    console_log<span style="color:#f92672">!</span>(<span style="color:#e6db74">&#34;{:?}&#34;</span>, <span style="color:#f92672">&amp;</span>req); <span style="color:#75715e">// console.log로 출력된 로그는 Workers Dashboard에 실시간으로 표시된다.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    router
+</span></span><span style="display:flex;"><span>        .get_async(<span style="color:#e6db74">&#34;/:foo/:bar&#34;</span>, handler) <span style="color:#75715e">// foo, bar argument를 캡쳐할 수 있다
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        .run(req, env)
+</span></span><span style="display:flex;"><span>        .<span style="color:#66d9ef">await</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">async</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">handler</span>(req: <span style="color:#a6e22e">Request</span>, ctx: <span style="color:#a6e22e">RouteContext</span><span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(key) <span style="color:#f92672">=</span> ctx.param(<span style="color:#e6db74">&#34;foo&#34;</span>) { <span style="color:#75715e">// Path argument `foo`를 가져옴
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        Response::ok(<span style="color:#e6db74">&#34;Hello&#34;</span>.to_string())
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// .with_headers(headers) // Response header도 설정할 수 있다.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="workers-kvhttpswwwcloudflarecomko-krproductsworkers-kv"><a href="https://www.cloudflare.com/ko-kr/products/workers-kv/">Workers KV</a><a hidden class="anchor" aria-hidden="true" href="#workers-kvhttpswwwcloudflarecomko-krproductsworkers-kv">#</a></h3>
 <p>GET/PUT/DELETE를 지원하는 간단한 KV 스토리지다. Workers에 배포된 코드는 전세계의 엣지에서 실행되기 때문에 KV도 완벽한 일관성(consistency)
 을 보장하지 않는다. 모든 엣지에 변경사항이 전파되는 데 최대 1분 걸릴 수 있다고 한다. KV의 value에는 만료 시간(TTL)과 메타데이터를 추가로 지정할 수 있다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">let</span> kv <span style="color:#f92672">=</span> ctx.kv(<span style="color:#e6db74">&#34;foo&#34;</span>)<span style="color:#f92672">?</span>;
-kv.put(<span style="color:#f92672">&amp;</span>hashed_key, body)<span style="color:#f92672">?</span>
-    .expiration_ttl(ttl)
-    .execute();
-</code></pre></div><h3 id="durable-objectshttpsdeveloperscloudflarecomworkersruntime-apisdurable-objects"><a href="https://developers.cloudflare.com/workers/runtime-apis/durable-objects">Durable Objects</a><a hidden class="anchor" aria-hidden="true" href="#durable-objectshttpsdeveloperscloudflarecomworkersruntime-apisdurable-objects">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">let</span> kv <span style="color:#f92672">=</span> ctx.kv(<span style="color:#e6db74">&#34;foo&#34;</span>)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>kv.put(<span style="color:#f92672">&amp;</span>hashed_key, body)<span style="color:#f92672">?</span>
+</span></span><span style="display:flex;"><span>    .expiration_ttl(ttl)
+</span></span><span style="display:flex;"><span>    .execute();
+</span></span></code></pre></div><h3 id="durable-objectshttpsdeveloperscloudflarecomworkersruntime-apisdurable-objects"><a href="https://developers.cloudflare.com/workers/runtime-apis/durable-objects">Durable Objects</a><a hidden class="anchor" aria-hidden="true" href="#durable-objectshttpsdeveloperscloudflarecomworkersruntime-apisdurable-objects">#</a></h3>
 <p>Workers 코드에 state를 부여할 수 있는 방법이라고 하는데, 아직은 사용해보지 않았다(결정적인 이유로 KV와 다르게 이쪽은 free plan이 없다.
 <a href="https://github.com/cloudflare/miniflare">miniflare</a>와 같은 도구로 로컬에서 시험해볼 수는 있어보인다.)</p>
 <h2 id="토이-서비스-메이플스토리-설정-연동-httpspccrosh">토이 서비스: 메이플스토리 설정 연동 (<a href="https://pc.cro.sh">https://pc.cro.sh</a>)<a hidden class="anchor" aria-hidden="true" href="#토이-서비스-메이플스토리-설정-연동-httpspccrosh">#</a></h2>
@@ -296,28 +296,28 @@ Windows의 <code>reg export</code> 명령어로 쉽게 추출이 가능하다. �
 <ul>
 <li>CORS 고려가 되어있지 않아 보인다. CORS preflight(<code>HTTP OPTIONS</code> 리퀘스트)에 대한 핸들링이 필요하고 응답 시에 헤더에도 <code>Allow-Origin</code> 헤더를 적절히 넣어줘야 한다.</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust">
-<span style="color:#66d9ef">trait</span> Cors {
-    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">cors</span>(self, req: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Request</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span>;
-}
-
-<span style="color:#66d9ef">impl</span> Cors <span style="color:#66d9ef">for</span> Response {
-    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">cors</span>(self, req: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Request</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span> {
-        <span style="color:#66d9ef">static</span> ALLOWED_ORIGINS: <span style="color:#66d9ef">&amp;</span>[<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">str</span>] <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>[<span style="color:#e6db74">&#34;http://localhost:3000&#34;</span>, <span style="color:#e6db74">&#34;https://pc.cro.sh&#34;</span>];
-
-        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> cors_header <span style="color:#f92672">=</span> Headers::new();
-        <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(origin) <span style="color:#f92672">=</span> req.headers().get(<span style="color:#e6db74">&#34;Origin&#34;</span>)<span style="color:#f92672">?</span> {
-            <span style="color:#66d9ef">if</span> ALLOWED_ORIGINS.iter().find(<span style="color:#f92672">|&amp;&amp;</span>x<span style="color:#f92672">|</span> x <span style="color:#f92672">==</span> origin).is_some() {
-                cors_header.append(<span style="color:#e6db74">&#34;Access-Control-Allow-Origin&#34;</span>, <span style="color:#f92672">&amp;</span>origin)<span style="color:#f92672">?</span>;
-            }
-        }
-
-        Ok(self.with_headers(cors_header))
-    }
-}
-
-<span style="color:#75715e">// Usage example: Response::error(&#34;Bad Request&#34;, 400)?.cors(&amp;req)
-</span></code></pre></div><ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">trait</span> Cors {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">cors</span>(self, req: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Request</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> Cors <span style="color:#66d9ef">for</span> Response {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">cors</span>(self, req: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">Request</span>) -&gt; Result<span style="color:#f92672">&lt;</span>Response<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">static</span> ALLOWED_ORIGINS: <span style="color:#66d9ef">&amp;</span>[<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">str</span>] <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>[<span style="color:#e6db74">&#34;http://localhost:3000&#34;</span>, <span style="color:#e6db74">&#34;https://pc.cro.sh&#34;</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> cors_header <span style="color:#f92672">=</span> Headers::new();
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> <span style="color:#66d9ef">let</span> Some(origin) <span style="color:#f92672">=</span> req.headers().get(<span style="color:#e6db74">&#34;Origin&#34;</span>)<span style="color:#f92672">?</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ALLOWED_ORIGINS.iter().find(<span style="color:#f92672">|&amp;&amp;</span>x<span style="color:#f92672">|</span> x <span style="color:#f92672">==</span> origin).is_some() {
+</span></span><span style="display:flex;"><span>                cors_header.append(<span style="color:#e6db74">&#34;Access-Control-Allow-Origin&#34;</span>, <span style="color:#f92672">&amp;</span>origin)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        Ok(self.with_headers(cors_header))
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Usage example: Response::error(&#34;Bad Request&#34;, 400)?.cors(&amp;req)
+</span></span></span></code></pre></div><ul>
 <li>
 <p>문제는 이것이 사용자 코드 레벨에서 처리되었기 때문에 unhandled exception 등이 발생하면 응답 헤더의 래핑이 되지 않고 브라우저 입장에서 CORS 요청이 실패했다는 결과만 받게 된다. Catch-all 패턴 등을 통해 추가적으로 코드를 감싸야 하는 것이다.</p>
 </li>

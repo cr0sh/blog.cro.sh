@@ -11,7 +11,7 @@
 <meta name="author" content="">
 <link rel="canonical" href="http://blog.cro.sh/posts/embedding-wasm-in-html/" />
 <link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.min.7680afc38aa6b15ddf158a4f3780b7b1f7dde7e91d26f073e6229bb7a0793c92.js" integrity="sha256-doCvw4qmsV3fFYpPN4C3sffd5&#43;kdJvBz5iKbt6B5PJI="
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.4dcb3c4f38462f66c6b6137227726f5543cb934cca9788f041c087e374491df2.js" integrity="sha256-Tcs8TzhGL2bGthNyJ3JvVUPLk0zKl4jwQcCH43RJHfI="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
@@ -20,7 +20,7 @@
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<meta name="generator" content="Hugo 0.92.2" />
+<meta name="generator" content="Hugo 0.93.0" />
 <noscript>
     <style>
         #theme-toggle,
@@ -99,7 +99,7 @@
   "keywords": [
     
   ],
-  "articleBody": "레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, ‘Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까’ 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.\nwasm-bindgen: Rust ❤️ WebAssembly Rust는 웹어셈블리 지원을 주된 세일즈 포인트로 잡기 때문에, 관련 라이브러리도 잘 발달되어 있다. wasm-bindgen은 Rust 코드를 몇 개의 attribute(파이썬, 자바의 decorator와 유사하다고 생각하면 편하다)만 추가해 WebAssembly 모듈로 바꿀 수 있게 해 준다. 간략하게 살펴보자.\n// lib.rs  use wasm_bindgen::prelude::*; #[wasm_bindgen] pub fn add_two(a: u8, b: u8) - u8 { a + b } # Cargo.toml [package] name = \"...\" # 생략 [dependencies] wasm-bindgen = \"^0.2.58\" # wasm-bindgen crate 추가 [lib] crate-type = [\"cdylib\"] # wasm-pack 과정에 필요, Wasm 외에 Rust 라이브러리로도 사용해야 한다면 \"rlib\"도 추가해야 한다. 이후 wasm-pack 명령어를 사용해 해당 모듈을 빌드할 수 있다.\n$ wasm-pack build [INFO]: Checking for the Wasm target... [INFO]: Compiling to Wasm... Compiling mylib v0.1.0 (/home/test/rust/mylib) Finished release [optimized] target(s) in 1.69s :-) [WARN]: origin crate has no README [INFO]: Installing wasm-bindgen... [INFO]: Optimizing wasm binaries with `wasm-opt`... [INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended [INFO]: :-) Done in 4.23s 그러면 해당 crate의 pkg 폴더 안에 Wasm 모듈이 생성된다. (mylib.js, mylib_bg.wasm)\n자바스크립트에서 해당 모듈을 사용하려면 다음과 같이 임포트 후 사용한다.\n 참고: 사실 node.js에서 Webpack을 사용해 해당 모듈을 번들링해야 하지만, 나도 잘 모르는 부분이고 결론적으로 이 방법을 쓰는 게 아니기 때문에 생략한다. 자세한 것은 이 부분을 참고하자.  const rust = import('./pkg'); rust .then(m = console.log(m.add_two(2, 5))) .catch(console.error); 더 자세한 설명은 wasm-bindgen 가이드와 wasm-pack 문서를 참고하면 좋다.\n의존성 줄이기: Webpack과 같은 번들러를 쓰지 않는 법 공식 문서에서도 Webpack 없이 직접 Wasm 모듈을 로드하는 법을 설명하고 있다. wasm-pack으로 빌드할 때 --target web 옵션을 주면 사전 번들링 작업 없이 브라우저에서 바로 코드를 실행할 수 있다. 이 때 .js 파일은 ES6 모듈로서 작동한다고 한다. (아직 브라우저에서 직접 Wasm 모듈을 불러올 수 없기 때문에 Javascript로 우회하여야 한다고 한다.)\nhtml head meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\"/ head body script type=\"module\" import init, { add_two } from './pkg/mylib.js'; async function run() { await init(); const result = add_two(1, 2); console.log(`1 + 2 = ${result}`); if (result !== 3) throw new Error(\"wasm addition doesn't work!\"); } run(); script body html  Tip: Chrome, Firefox와 같은 최신 브라우저에서 이 HTML 파일을 로컬로 저장한 다음 열면 동작하지 않을 것이다. 이는 CORS(Cross-Origin Resource Sharing) 정책에 의해 임의의 로컬 파일을 읽을 수 없도록 막아놓았기 때문이다. 파이어폭스의 경우에는 about:config에서 privacy.file_unique_origin 설정을 false로 바꾸면 동작하지만 이는 사실상 컴퓨터 내의 모든 파일을 읽게 허용하는 보안 위협이므로 잠깐만 활성화한 후 원래대로 돌려놓는 것이 좋다.  이제 우리는 Wasm 모듈을 하나 작성했다! 다음 문제는 이 .js 파일과 .wasm 파일을 HTML 문서 하나로 합치는 것이다.\nInlining Wasm modules 먼저 간단한 편인 Wasm 모듈을 HTML 안으로 내장하자. .wasm 파일의 내용을 base64로 인코딩한 뒤, 자바스크립트 안에 하드코딩했다.\nhtml  head head body script type=\"module\" // base64 인코딩된 .wasm 파일  let wasm_base64 = \"AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=\"; let wasm_binary = Uint8Array.from(atob(wasm_base64), c = c.charCodeAt(0)).buffer; script body html 이렇게 .wasm 파일을 브라우저 메모리 상에 로드하였다. 다음은 Wasm 모듈의 코드를 자바스크립트 세계와 연결할 자바스크립트 모듈을 로드할 차례이다.\nInlining ES6 modules  Inlining ECMAScript Modules in HTML - Stack Overflow를 참고하였다.  해당 질문의 답변을 보면 ES6 모듈을 Blob으로 만들어 동적으로  태그를 생성하는 방법을 취하고 있다. 답변의 코드는 어느 정도 minify(사실은 난독화도 겸하는 것 같지만…)되어 있어, 방법론만 참고하여 읽기 좋게 다시 구현해 보았다.\nhtml head meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\" / head body  script type=\"inline-module\" id=\"wasm-bridge\" let wasm; /** * @param {number} a * @param {number} b * @returns {number} */ export function add_two(a, b) { var ret = wasm.add_two(a, b); return ret; } function init(module) { if (typeof module === 'undefined') { module = import.meta.url.replace(/\\.js$/, '_bg.wasm'); } let result; const imports = {}; if ((typeof URL === 'function' \u0026\u0026 module instanceof URL) || typeof module === 'string' || (typeof Request === 'function' \u0026\u0026 module instanceof Request)) { const response = fetch(module); if (typeof WebAssembly.instantiateStreaming === 'function') { result = WebAssembly.instantiateStreaming(response, imports) .catch(e = { return response .then(r = { if (r.headers.get('Content-Type') != 'application/wasm') { console.warn(\"`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\\n\", e); return r.arrayBuffer(); } else { throw e; } }) .then(bytes = WebAssembly.instantiate(bytes, imports)); }); } else { result = response .then(r = r.arrayBuffer()) .then(bytes = WebAssembly.instantiate(bytes, imports)); } } else { result = WebAssembly.instantiate(module, imports) .then(result = { if (result instanceof WebAssembly.Instance) { return { instance: result, module }; } else { return result; } }); } return result.then(({ instance, module }) = { wasm = instance.exports; init.__wbindgen_wasm_module = module; return wasm; }); } export default init; script  script type=\"inline-module\" id=\"main\" let wasm_base64 = \"AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=\"; let wasm_binary = Uint8Array.from(atob(wasm_base64), c = c.charCodeAt(0)).buffer; async function run() { await init(wasm_binary); const result = add_two(1, 2); console.log(`1 + 2 = ${result}`); if (result !== 3) throw new Error(\"wasm addition doesn't work!\"); } run(); script  script let wasm_inline = document.querySelector(\"script#wasm-bridge[type=inline-module]\") let wasm_elem = document.createElement(\"script\"); wasm_elem.setAttribute(\"type\", \"module\"); wasm_elem.setAttribute(\"generated\", true); wasm_elem.textContent = wasm_inline.textContent; wasm_elem.src = URL.createObjectURL(new Blob([wasm_inline.textContent], { type: \"application/javascript\" })); wasm_inline.replaceWith(wasm_elem); let main = document.querySelector(\"script#main[type=inline-module]\"); let main_replace = document.createElement(\"script\"); main_replace.setAttribute(\"type\", \"module\"); main_replace.setAttribute(\"generated\", true); if (main.id) main_replace.id = main.id; main_replace.textContent = `/* generated */ import init, { add_two } from \"${wasm_elem.src}\";\\n\\n` + main.textContent; main.replaceWith(main_replace) script body html 여기서 눈여겨볼 점은 main 스크립트의 init() 부분이다. init() 함수는 Uint8Array와 같은 Wasm 바이너리 배열이 주어지면 거기서부터 직접 로드하기 때문에, 이와 같은 작업이 가능하다.\nConclusion 지금까지 HTML 파일 안에 WebAssembly 모듈과 이를 로드하는 ES6 자바스크립트 모듈을 내장하는 방법을 살펴보았다. 언젠가  등에서 직접 Wasm 코드를 임포트하도록 통합되면 이 과정은 더 간단해질 것으로 보인다.\n",
+  "articleBody": "레지스트리를 암호화해 저장하는 프로그램인 Zandam을 개발하면서, ‘Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까’ 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.\nwasm-bindgen: Rust ❤️ WebAssembly Rust는 웹어셈블리 지원을 주된 세일즈 포인트로 잡기 때문에, 관련 라이브러리도 잘 발달되어 있다. wasm-bindgen은 Rust 코드를 몇 개의 attribute(파이썬, 자바의 decorator와 유사하다고 생각하면 편하다)만 추가해 WebAssembly 모듈로 바꿀 수 있게 해 준다. 간략하게 살펴보자.\n// lib.rs  use wasm_bindgen::prelude::*;  #[wasm_bindgen] pub fn add_two(a: u8, b: u8) - u8 {  a + b } # Cargo.toml  [package] name = \"...\" # 생략  [dependencies] wasm-bindgen = \"^0.2.58\" # wasm-bindgen crate 추가  [lib] crate-type = [\"cdylib\"] # wasm-pack 과정에 필요, Wasm 외에 Rust 라이브러리로도 사용해야 한다면 \"rlib\"도 추가해야 한다. 이후 wasm-pack 명령어를 사용해 해당 모듈을 빌드할 수 있다.\n$ wasm-pack build [INFO]: Checking for the Wasm target... [INFO]: Compiling to Wasm... Compiling mylib v0.1.0 (/home/test/rust/mylib) Finished release [optimized] target(s) in 1.69s :-) [WARN]: origin crate has no README [INFO]: Installing wasm-bindgen... [INFO]: Optimizing wasm binaries with `wasm-opt`... [INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended [INFO]: :-) Done in 4.23s 그러면 해당 crate의 pkg 폴더 안에 Wasm 모듈이 생성된다. (mylib.js, mylib_bg.wasm)\n자바스크립트에서 해당 모듈을 사용하려면 다음과 같이 임포트 후 사용한다.\n 참고: 사실 node.js에서 Webpack을 사용해 해당 모듈을 번들링해야 하지만, 나도 잘 모르는 부분이고 결론적으로 이 방법을 쓰는 게 아니기 때문에 생략한다. 자세한 것은 이 부분을 참고하자.  const rust = import('./pkg');  rust  .then(m = console.log(m.add_two(2, 5)))  .catch(console.error); 더 자세한 설명은 wasm-bindgen 가이드와 wasm-pack 문서를 참고하면 좋다.\n의존성 줄이기: Webpack과 같은 번들러를 쓰지 않는 법 공식 문서에서도 Webpack 없이 직접 Wasm 모듈을 로드하는 법을 설명하고 있다. wasm-pack으로 빌드할 때 --target web 옵션을 주면 사전 번들링 작업 없이 브라우저에서 바로 코드를 실행할 수 있다. 이 때 .js 파일은 ES6 모듈로서 작동한다고 한다. (아직 브라우저에서 직접 Wasm 모듈을 불러올 수 없기 때문에 Javascript로 우회하여야 한다고 한다.)\nhtml  head  meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\"/  head  body  script type=\"module\"  import init, { add_two } from './pkg/mylib.js';   async function run() {  await init();   const result = add_two(1, 2);  console.log(`1 + 2 = ${result}`);  if (result !== 3)  throw new Error(\"wasm addition doesn't work!\");  }   run();  script  body html  Tip: Chrome, Firefox와 같은 최신 브라우저에서 이 HTML 파일을 로컬로 저장한 다음 열면 동작하지 않을 것이다. 이는 CORS(Cross-Origin Resource Sharing) 정책에 의해 임의의 로컬 파일을 읽을 수 없도록 막아놓았기 때문이다. 파이어폭스의 경우에는 about:config에서 privacy.file_unique_origin 설정을 false로 바꾸면 동작하지만 이는 사실상 컴퓨터 내의 모든 파일을 읽게 허용하는 보안 위협이므로 잠깐만 활성화한 후 원래대로 돌려놓는 것이 좋다.  이제 우리는 Wasm 모듈을 하나 작성했다! 다음 문제는 이 .js 파일과 .wasm 파일을 HTML 문서 하나로 합치는 것이다.\nInlining Wasm modules 먼저 간단한 편인 Wasm 모듈을 HTML 안으로 내장하자. .wasm 파일의 내용을 base64로 인코딩한 뒤, 자바스크립트 안에 하드코딩했다.\nhtml  head head body  script type=\"module\"   // base64 인코딩된 .wasm 파일  let wasm_base64 = \"AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=\";  let wasm_binary = Uint8Array.from(atob(wasm_base64), c = c.charCodeAt(0)).buffer;   script body html 이렇게 .wasm 파일을 브라우저 메모리 상에 로드하였다. 다음은 Wasm 모듈의 코드를 자바스크립트 세계와 연결할 자바스크립트 모듈을 로드할 차례이다.\nInlining ES6 modules  Inlining ECMAScript Modules in HTML - Stack Overflow를 참고하였다.  해당 질문의 답변을 보면 ES6 모듈을 Blob으로 만들어 동적으로  태그를 생성하는 방법을 취하고 있다. 답변의 코드는 어느 정도 minify(사실은 난독화도 겸하는 것 같지만…)되어 있어, 방법론만 참고하여 읽기 좋게 다시 구현해 보았다.\nhtml  head  meta content=\"text/html;charset=utf-8\" http-equiv=\"Content-Type\" / head  body    script type=\"inline-module\" id=\"wasm-bridge\"  let wasm;   /** * @param {number} a * @param {number} b * @returns {number} */  export function add_two(a, b) {  var ret = wasm.add_two(a, b);  return ret;  }   function init(module) {  if (typeof module === 'undefined') {  module = import.meta.url.replace(/\\.js$/, '_bg.wasm');  }  let result;  const imports = {};   if ((typeof URL === 'function' \u0026\u0026 module instanceof URL) || typeof module === 'string' || (typeof Request === 'function' \u0026\u0026 module instanceof Request)) {   const response = fetch(module);  if (typeof WebAssembly.instantiateStreaming === 'function') {  result = WebAssembly.instantiateStreaming(response, imports)  .catch(e = {  return response  .then(r = {  if (r.headers.get('Content-Type') != 'application/wasm') {  console.warn(\"`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\\n\", e);  return r.arrayBuffer();  } else {  throw e;  }  })  .then(bytes = WebAssembly.instantiate(bytes, imports));  });  } else {  result = response  .then(r = r.arrayBuffer())  .then(bytes = WebAssembly.instantiate(bytes, imports));  }  } else {   result = WebAssembly.instantiate(module, imports)  .then(result = {  if (result instanceof WebAssembly.Instance) {  return { instance: result, module };  } else {  return result;  }  });  }  return result.then(({ instance, module }) = {  wasm = instance.exports;  init.__wbindgen_wasm_module = module;   return wasm;  });  }   export default init;  script     script type=\"inline-module\" id=\"main\"  let wasm_base64 = \"AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=\";  let wasm_binary = Uint8Array.from(atob(wasm_base64), c = c.charCodeAt(0)).buffer;   async function run() {  await init(wasm_binary);   const result = add_two(1, 2);  console.log(`1 + 2 = ${result}`);  if (result !== 3)  throw new Error(\"wasm addition doesn't work!\");  }   run();  script     script  let wasm_inline = document.querySelector(\"script#wasm-bridge[type=inline-module]\")  let wasm_elem = document.createElement(\"script\");  wasm_elem.setAttribute(\"type\", \"module\");  wasm_elem.setAttribute(\"generated\", true);  wasm_elem.textContent = wasm_inline.textContent;  wasm_elem.src = URL.createObjectURL(new Blob([wasm_inline.textContent], { type: \"application/javascript\" }));  wasm_inline.replaceWith(wasm_elem);   let main = document.querySelector(\"script#main[type=inline-module]\");  let main_replace = document.createElement(\"script\");  main_replace.setAttribute(\"type\", \"module\");  main_replace.setAttribute(\"generated\", true);  if (main.id) main_replace.id = main.id;  main_replace.textContent = `/* generated */ import init, { add_two } from \"${wasm_elem.src}\";\\n\\n` + main.textContent;   main.replaceWith(main_replace)  script body  html 여기서 눈여겨볼 점은 main 스크립트의 init() 부분이다. init() 함수는 Uint8Array와 같은 Wasm 바이너리 배열이 주어지면 거기서부터 직접 로드하기 때문에, 이와 같은 작업이 가능하다.\nConclusion 지금까지 HTML 파일 안에 WebAssembly 모듈과 이를 로드하는 ES6 자바스크립트 모듈을 내장하는 방법을 살펴보았다. 언젠가  등에서 직접 Wasm 코드를 임포트하도록 통합되면 이 과정은 더 간단해질 것으로 보인다.\n",
   "wordCount" : "954",
   "inLanguage": "en",
   "datePublished": "2020-02-23T17:57:08+09:00",
@@ -178,25 +178,25 @@
 <h2 id="wasm-bindgen-rust--webassembly"><code>wasm-bindgen</code>: Rust ❤️ WebAssembly<a hidden class="anchor" aria-hidden="true" href="#wasm-bindgen-rust--webassembly">#</a></h2>
 <p>Rust는 웹어셈블리 지원을 주된 세일즈 포인트로 잡기 때문에, 관련 라이브러리도 잘 발달되어 있다.
 <code>wasm-bindgen</code>은 Rust 코드를 몇 개의 attribute(파이썬, 자바의 decorator와 유사하다고 생각하면 편하다)만 추가해 WebAssembly 모듈로 바꿀 수 있게 해 준다. 간략하게 살펴보자.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#75715e">// lib.rs
-</span><span style="color:#75715e"></span>
-<span style="color:#66d9ef">use</span> wasm_bindgen::prelude::<span style="color:#f92672">*</span>;
-
-<span style="color:#75715e">#[wasm_bindgen]</span>
-<span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">add_two</span>(a: <span style="color:#66d9ef">u8</span>, b: <span style="color:#66d9ef">u8</span>) -&gt; <span style="color:#66d9ef">u8</span> {
-    a <span style="color:#f92672">+</span> b
-}
-</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-toml" data-lang="toml"><span style="color:#75715e"># Cargo.toml</span>
-
-[<span style="color:#a6e22e">package</span>]
-<span style="color:#a6e22e">name</span> = <span style="color:#e6db74">&#34;...&#34;</span> <span style="color:#75715e"># 생략</span>
-
-[<span style="color:#a6e22e">dependencies</span>]
-<span style="color:#a6e22e">wasm-bindgen</span> = <span style="color:#e6db74">&#34;^0.2.58&#34;</span> <span style="color:#75715e"># wasm-bindgen crate 추가</span>
-
-[<span style="color:#a6e22e">lib</span>]
-<span style="color:#a6e22e">crate-type</span> = [<span style="color:#e6db74">&#34;cdylib&#34;</span>] <span style="color:#75715e"># wasm-pack 과정에 필요, Wasm 외에 Rust 라이브러리로도 사용해야 한다면 &#34;rlib&#34;도 추가해야 한다.</span>
-</code></pre></div><p>이후 <code>wasm-pack</code> 명령어를 사용해 해당 모듈을 빌드할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// lib.rs
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">use</span> wasm_bindgen::prelude::<span style="color:#f92672">*</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[wasm_bindgen]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">add_two</span>(a: <span style="color:#66d9ef">u8</span>, b: <span style="color:#66d9ef">u8</span>) -&gt; <span style="color:#66d9ef">u8</span> {
+</span></span><span style="display:flex;"><span>    a <span style="color:#f92672">+</span> b
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span><span style="color:#75715e"># Cargo.toml</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">package</span>]
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">name</span> = <span style="color:#e6db74">&#34;...&#34;</span> <span style="color:#75715e"># 생략</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">dependencies</span>]
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">wasm-bindgen</span> = <span style="color:#e6db74">&#34;^0.2.58&#34;</span> <span style="color:#75715e"># wasm-bindgen crate 추가</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">lib</span>]
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">crate-type</span> = [<span style="color:#e6db74">&#34;cdylib&#34;</span>] <span style="color:#75715e"># wasm-pack 과정에 필요, Wasm 외에 Rust 라이브러리로도 사용해야 한다면 &#34;rlib&#34;도 추가해야 한다.</span>
+</span></span></code></pre></div><p>이후 <code>wasm-pack</code> 명령어를 사용해 해당 모듈을 빌드할 수 있다.</p>
 <pre tabindex="0"><code>$ wasm-pack build
 
 [INFO]: Checking for the Wasm target...
@@ -206,44 +206,43 @@
 :-) [WARN]: origin crate has no README
 [INFO]: Installing wasm-bindgen...
 [INFO]: Optimizing wasm binaries with `wasm-opt`...
-[INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended
+[INFO]: Optional fields missing from Cargo.toml: &#39;description&#39;, &#39;repository&#39;, and &#39;license&#39;. These are not necessary, but recommended
 [INFO]: :-) Done in 4.23s
 </code></pre><p>그러면 해당 crate의 <code>pkg</code> 폴더 안에 Wasm 모듈이 생성된다. (<code>mylib.js</code>, <code>mylib_bg.wasm</code>)</p>
 <p>자바스크립트에서 해당 모듈을 사용하려면 다음과 같이 임포트 후 사용한다.</p>
 <ul>
 <li>참고: 사실 node.js에서 Webpack을 사용해 해당 모듈을 번들링해야 하지만, 나도 잘 모르는 부분이고 결론적으로 이 방법을 쓰는 게 아니기 때문에 생략한다. 자세한 것은 <a href="https://rustwasm.github.io/docs/wasm-bindgen/examples/hello-world.html#webpack-specific-files">이 부분</a>을 참고하자.</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rust</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">import</span>(<span style="color:#e6db74">&#39;./pkg&#39;</span>);
-
-<span style="color:#a6e22e">rust</span>
-  .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">m</span> =&gt; <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">5</span>)))
-  .<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>);
-
-</code></pre></div><p>더 자세한 설명은 <a href="https://rustwasm.github.io/docs/wasm-bindgen/">wasm-bindgen</a> 가이드와 <a href="https://rustwasm.github.io/docs/wasm-pack/">wasm-pack</a> 문서를 참고하면 좋다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">rust</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">import</span>(<span style="color:#e6db74">&#39;./pkg&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">rust</span>
+</span></span><span style="display:flex;"><span>  .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">m</span> =&gt; <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">m</span>.<span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">2</span>, <span style="color:#ae81ff">5</span>)))
+</span></span><span style="display:flex;"><span>  .<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">error</span>);
+</span></span></code></pre></div><p>더 자세한 설명은 <a href="https://rustwasm.github.io/docs/wasm-bindgen/">wasm-bindgen</a> 가이드와 <a href="https://rustwasm.github.io/docs/wasm-pack/">wasm-pack</a> 문서를 참고하면 좋다.</p>
 <h2 id="의존성-줄이기-webpack과-같은-번들러를-쓰지-않는-법">의존성 줄이기: Webpack과 같은 번들러를 쓰지 않는 법<a hidden class="anchor" aria-hidden="true" href="#의존성-줄이기-webpack과-같은-번들러를-쓰지-않는-법">#</a></h2>
 <p><a href="https://rustwasm.github.io/docs/wasm-bindgen/examples/without-a-bundler.html">공식 문서</a>에서도 Webpack 없이 직접 Wasm 모듈을 로드하는 법을 설명하고 있다. <code>wasm-pack</code>으로 빌드할 때 <code>--target web</code> 옵션을 주면 사전 번들링 작업 없이 브라우저에서 바로 코드를 실행할 수 있다. 이 때 <code>.js</code> 파일은 ES6 모듈로서 작동한다고 한다. (아직 브라우저에서 직접 Wasm 모듈을 불러올 수 없기 때문에 Javascript로 우회하여야 한다고 한다.)</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">html</span>&gt;
-  &lt;<span style="color:#f92672">head</span>&gt;
-    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html;charset=utf-8&#34;</span> <span style="color:#a6e22e">http-equiv</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content-Type&#34;</span>/&gt;
-  &lt;/<span style="color:#f92672">head</span>&gt;
-  &lt;<span style="color:#f92672">body</span>&gt;
-    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;module&#34;</span>&gt;
-      <span style="color:#66d9ef">import</span> <span style="color:#a6e22e">init</span>, { <span style="color:#a6e22e">add_two</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;./pkg/mylib.js&#39;</span>;
-
-      <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
-        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">init</span>();
-
-        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
-        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`1 + 2 = </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
-        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">result</span> <span style="color:#f92672">!==</span> <span style="color:#ae81ff">3</span>)
-          <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;wasm addition doesn&#39;t work!&#34;</span>);
-      }
-
-      <span style="color:#a6e22e">run</span>();
-    &lt;/<span style="color:#f92672">script</span>&gt;
-  &lt;/<span style="color:#f92672">body</span>&gt;
-&lt;/<span style="color:#f92672">html</span>&gt;
-</code></pre></div><ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html;charset=utf-8&#34;</span> <span style="color:#a6e22e">http-equiv</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content-Type&#34;</span>/&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;module&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">import</span> <span style="color:#a6e22e">init</span>, { <span style="color:#a6e22e">add_two</span> } <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;./pkg/mylib.js&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">init</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`1 + 2 = </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">result</span> <span style="color:#f92672">!==</span> <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>          <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;wasm addition doesn&#39;t work!&#34;</span>);
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">run</span>();
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>  &lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><ul>
 <li>Tip: Chrome, Firefox와 같은 최신 브라우저에서 이 HTML 파일을 로컬로 저장한 다음 열면 동작하지 않을 것이다. 이는 CORS(Cross-Origin Resource Sharing) 정책에 의해 임의의 로컬 파일을 읽을 수 없도록 막아놓았기 때문이다.
 파이어폭스의 경우에는 <code>about:config</code>에서 <code>privacy.file_unique_origin</code> 설정을 <code>false</code>로 바꾸면 동작하지만 이는 사실상 컴퓨터 내의 모든 파일을 읽게 허용하는 보안 위협이므로 잠깐만 활성화한 후 원래대로 돌려놓는 것이 좋다.</li>
 </ul>
@@ -252,138 +251,138 @@
 <p>이제 우리는 Wasm 모듈을 하나 작성했다! 다음 문제는 이 .js 파일과 .wasm 파일을 HTML 문서 하나로 합치는 것이다.</p>
 <h2 id="inlining-wasm-modules">Inlining Wasm modules<a hidden class="anchor" aria-hidden="true" href="#inlining-wasm-modules">#</a></h2>
 <p>먼저 간단한 편인 Wasm 모듈을 HTML 안으로 내장하자. .wasm 파일의 내용을 base64로 인코딩한 뒤, 자바스크립트 안에 하드코딩했다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">html</span>&gt;
-<span style="color:#75715e">&lt;!-- 중요하지 않은 정보들은 모두 생략했다. --&gt;</span>
-&lt;<span style="color:#f92672">head</span>&gt;
-&lt;/<span style="color:#f92672">head</span>&gt;
-&lt;<span style="color:#f92672">body</span>&gt;
-    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;module&#34;</span>&gt;
-
-        <span style="color:#75715e">// base64 인코딩된 .wasm 파일
-</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_base64</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=&#34;</span>;
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Uint8Array</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">atob</span>(<span style="color:#a6e22e">wasm_base64</span>), <span style="color:#a6e22e">c</span> =&gt; <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#ae81ff">0</span>)).<span style="color:#a6e22e">buffer</span>;
-
-    &lt;/<span style="color:#f92672">script</span>&gt;
-&lt;/<span style="color:#f92672">body</span>&gt;
-&lt;/<span style="color:#f92672">html</span>&gt;
-</code></pre></div><p>이렇게 .wasm 파일을 브라우저 메모리 상에 로드하였다. 다음은 Wasm 모듈의 코드를 자바스크립트 세계와 연결할 자바스크립트 모듈을 로드할 차례이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- 중요하지 않은 정보들은 모두 생략했다. --&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;module&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// base64 인코딩된 .wasm 파일
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_base64</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Uint8Array</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">atob</span>(<span style="color:#a6e22e">wasm_base64</span>), <span style="color:#a6e22e">c</span> =&gt; <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#ae81ff">0</span>)).<span style="color:#a6e22e">buffer</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>이렇게 .wasm 파일을 브라우저 메모리 상에 로드하였다. 다음은 Wasm 모듈의 코드를 자바스크립트 세계와 연결할 자바스크립트 모듈을 로드할 차례이다.</p>
 <h2 id="inlining-es6-modules">Inlining ES6 modules<a hidden class="anchor" aria-hidden="true" href="#inlining-es6-modules">#</a></h2>
 <ul>
 <li><a href="https://stackoverflow.com/questions/43817297/inlining-ecmascript-modules-in-html">Inlining ECMAScript Modules in HTML - Stack Overflow</a>를 참고하였다.</li>
 </ul>
 <p>해당 질문의 답변을 보면 ES6 모듈을 <a href="https://developer.mozilla.org/ko/docs/Web/API/Blob">Blob</a>으로 만들어 동적으로 <code>&lt;script&gt;</code> 태그를 생성하는 방법을 취하고 있다. 답변의 코드는 어느 정도 minify(사실은 난독화도 겸하는 것 같지만&hellip;)되어 있어, 방법론만 참고하여 읽기 좋게 다시 구현해 보았다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">html</span>&gt;
-
-&lt;<span style="color:#f92672">head</span>&gt;
-    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html;charset=utf-8&#34;</span> <span style="color:#a6e22e">http-equiv</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content-Type&#34;</span> /&gt;
-&lt;/<span style="color:#f92672">head</span>&gt;
-
-&lt;<span style="color:#f92672">body</span>&gt;
-    <span style="color:#75715e">&lt;!-- mylib.js의 내용. type이 inline-module인 것에 유의 --&gt;</span>
-    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;inline-module&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;wasm-bridge&#34;</span>&gt;
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm</span>;
-
-        <span style="color:#75715e">/**
-</span><span style="color:#75715e">        * @param {number} a
-</span><span style="color:#75715e">        * @param {number} b
-</span><span style="color:#75715e">        * @returns {number}
-</span><span style="color:#75715e">        */</span>
-        <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) {
-            <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ret</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">wasm</span>.<span style="color:#a6e22e">add_two</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>);
-            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ret</span>;
-        }
-
-        <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">init</span>(<span style="color:#a6e22e">module</span>) {
-            <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">module</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;undefined&#39;</span>) {
-                <span style="color:#a6e22e">module</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">import</span>.<span style="color:#a6e22e">meta</span>.<span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">replace</span>(<span style="color:#e6db74">/\.js$/</span>, <span style="color:#e6db74">&#39;_bg.wasm&#39;</span>);
-            }
-            <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">result</span>;
-            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">imports</span> <span style="color:#f92672">=</span> {};
-
-            <span style="color:#66d9ef">if</span> ((<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">URL</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;function&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">module</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">URL</span>) <span style="color:#f92672">||</span> <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">module</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;string&#39;</span> <span style="color:#f92672">||</span> (<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">Request</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;function&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">module</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">Request</span>)) {
-
-                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#a6e22e">module</span>);
-                <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiateStreaming</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;function&#39;</span>) {
-                    <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiateStreaming</span>(<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">imports</span>)
-                        .<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">e</span> =&gt; {
-                            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>
-                                .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">r</span> =&gt; {
-                                    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">headers</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>) <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#39;application/wasm&#39;</span>) {
-                                        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">warn</span>(<span style="color:#e6db74">&#34;`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n&#34;</span>, <span style="color:#a6e22e">e</span>);
-                                        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">arrayBuffer</span>();
-                                    } <span style="color:#66d9ef">else</span> {
-                                        <span style="color:#66d9ef">throw</span> <span style="color:#a6e22e">e</span>;
-                                    }
-                                })
-                                .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">bytes</span> =&gt; <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiate</span>(<span style="color:#a6e22e">bytes</span>, <span style="color:#a6e22e">imports</span>));
-                        });
-                } <span style="color:#66d9ef">else</span> {
-                    <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>
-                        .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">r</span> =&gt; <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">arrayBuffer</span>())
-                        .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">bytes</span> =&gt; <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiate</span>(<span style="color:#a6e22e">bytes</span>, <span style="color:#a6e22e">imports</span>));
-                }
-            } <span style="color:#66d9ef">else</span> {
-
-                <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiate</span>(<span style="color:#a6e22e">module</span>, <span style="color:#a6e22e">imports</span>)
-                    .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">result</span> =&gt; {
-                        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">result</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">Instance</span>) {
-                            <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">instance</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">result</span>, <span style="color:#a6e22e">module</span> };
-                        } <span style="color:#66d9ef">else</span> {
-                            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>;
-                        }
-                    });
-            }
-            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>.<span style="color:#a6e22e">then</span>(({ <span style="color:#a6e22e">instance</span>, <span style="color:#a6e22e">module</span> }) =&gt; {
-                <span style="color:#a6e22e">wasm</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">instance</span>.<span style="color:#a6e22e">exports</span>;
-                <span style="color:#a6e22e">init</span>.<span style="color:#a6e22e">__wbindgen_wasm_module</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">module</span>;
-
-                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">wasm</span>;
-            });
-        }
-
-        <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">init</span>;
-    &lt;/<span style="color:#f92672">script</span>&gt;
-
-    <span style="color:#75715e">&lt;!-- 기존 코드. type이 inline-module인 것에 유의 --&gt;</span>
-    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;inline-module&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;main&#34;</span>&gt;
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_base64</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=&#34;</span>;
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Uint8Array</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">atob</span>(<span style="color:#a6e22e">wasm_base64</span>), <span style="color:#a6e22e">c</span> =&gt; <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#ae81ff">0</span>)).<span style="color:#a6e22e">buffer</span>;
-
-        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
-            <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">init</span>(<span style="color:#a6e22e">wasm_binary</span>);
-
-            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
-            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`1 + 2 = </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
-            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">result</span> <span style="color:#f92672">!==</span> <span style="color:#ae81ff">3</span>)
-                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;wasm addition doesn&#39;t work!&#34;</span>);
-        }
-
-        <span style="color:#a6e22e">run</span>();
-    &lt;/<span style="color:#f92672">script</span>&gt;
-
-    <span style="color:#75715e">&lt;!-- ES6 Module Blob 생성 후 해당 URL을 사용하여 임포트하도록, 스크립트 내용을 바꿔치기한다 --&gt;</span>
-    &lt;<span style="color:#f92672">script</span>&gt;
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_inline</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">&#34;script#wasm-bridge[type=inline-module]&#34;</span>)
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_elem</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#34;script&#34;</span>);
-        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;type&#34;</span>, <span style="color:#e6db74">&#34;module&#34;</span>);
-        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;generated&#34;</span>, <span style="color:#66d9ef">true</span>);
-        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">wasm_inline</span>.<span style="color:#a6e22e">textContent</span>;
-        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">src</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">URL</span>.<span style="color:#a6e22e">createObjectURL</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Blob</span>([<span style="color:#a6e22e">wasm_inline</span>.<span style="color:#a6e22e">textContent</span>], { <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;application/javascript&#34;</span> }));
-        <span style="color:#a6e22e">wasm_inline</span>.<span style="color:#a6e22e">replaceWith</span>(<span style="color:#a6e22e">wasm_elem</span>);
-
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">main</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">&#34;script#main[type=inline-module]&#34;</span>);
-        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">main_replace</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#34;script&#34;</span>);
-        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;type&#34;</span>, <span style="color:#e6db74">&#34;module&#34;</span>);
-        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;generated&#34;</span>, <span style="color:#66d9ef">true</span>);
-        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">id</span>) <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">id</span>;
-        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`/* generated */ import init, { add_two } from &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">src</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;;\n\n`</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">textContent</span>;
-
-        <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">replaceWith</span>(<span style="color:#a6e22e">main_replace</span>)
-    &lt;/<span style="color:#f92672">script</span>&gt;
-&lt;/<span style="color:#f92672">body</span>&gt;
-
-&lt;/<span style="color:#f92672">html</span>&gt;
-</code></pre></div><p>여기서 눈여겨볼 점은 <code>main</code> 스크립트의 init() 부분이다. init() 함수는 Uint8Array와 같은 Wasm 바이너리 배열이 주어지면 거기서부터 직접 로드하기 때문에, 이와 같은 작업이 가능하다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">html</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html;charset=utf-8&#34;</span> <span style="color:#a6e22e">http-equiv</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;Content-Type&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">&lt;!-- mylib.js의 내용. type이 inline-module인 것에 유의 --&gt;</span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;inline-module&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;wasm-bridge&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">/**
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        * @param {number} a
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        * @param {number} b
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        * @returns {number}
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">        */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">ret</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">wasm</span>.<span style="color:#a6e22e">add_two</span>(<span style="color:#a6e22e">a</span>, <span style="color:#a6e22e">b</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">ret</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">init</span>(<span style="color:#a6e22e">module</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">module</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;undefined&#39;</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">module</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">import</span>.<span style="color:#a6e22e">meta</span>.<span style="color:#a6e22e">url</span>.<span style="color:#a6e22e">replace</span>(<span style="color:#e6db74">/\.js$/</span>, <span style="color:#e6db74">&#39;_bg.wasm&#39;</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">result</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">imports</span> <span style="color:#f92672">=</span> {};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> ((<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">URL</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;function&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">module</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">URL</span>) <span style="color:#f92672">||</span> <span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">module</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;string&#39;</span> <span style="color:#f92672">||</span> (<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">Request</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;function&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">module</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">Request</span>)) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">response</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fetch</span>(<span style="color:#a6e22e">module</span>);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">typeof</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiateStreaming</span> <span style="color:#f92672">===</span> <span style="color:#e6db74">&#39;function&#39;</span>) {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiateStreaming</span>(<span style="color:#a6e22e">response</span>, <span style="color:#a6e22e">imports</span>)
+</span></span><span style="display:flex;"><span>                        .<span style="color:#66d9ef">catch</span>(<span style="color:#a6e22e">e</span> =&gt; {
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">response</span>
+</span></span><span style="display:flex;"><span>                                .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">r</span> =&gt; {
+</span></span><span style="display:flex;"><span>                                    <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">headers</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>) <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#39;application/wasm&#39;</span>) {
+</span></span><span style="display:flex;"><span>                                        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">warn</span>(<span style="color:#e6db74">&#34;`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n&#34;</span>, <span style="color:#a6e22e">e</span>);
+</span></span><span style="display:flex;"><span>                                        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">arrayBuffer</span>();
+</span></span><span style="display:flex;"><span>                                    } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                                        <span style="color:#66d9ef">throw</span> <span style="color:#a6e22e">e</span>;
+</span></span><span style="display:flex;"><span>                                    }
+</span></span><span style="display:flex;"><span>                                })
+</span></span><span style="display:flex;"><span>                                .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">bytes</span> =&gt; <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiate</span>(<span style="color:#a6e22e">bytes</span>, <span style="color:#a6e22e">imports</span>));
+</span></span><span style="display:flex;"><span>                        });
+</span></span><span style="display:flex;"><span>                } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>
+</span></span><span style="display:flex;"><span>                        .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">r</span> =&gt; <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">arrayBuffer</span>())
+</span></span><span style="display:flex;"><span>                        .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">bytes</span> =&gt; <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiate</span>(<span style="color:#a6e22e">bytes</span>, <span style="color:#a6e22e">imports</span>));
+</span></span><span style="display:flex;"><span>                }
+</span></span><span style="display:flex;"><span>            } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">instantiate</span>(<span style="color:#a6e22e">module</span>, <span style="color:#a6e22e">imports</span>)
+</span></span><span style="display:flex;"><span>                    .<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">result</span> =&gt; {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">result</span> <span style="color:#66d9ef">instanceof</span> <span style="color:#a6e22e">WebAssembly</span>.<span style="color:#a6e22e">Instance</span>) {
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">return</span> { <span style="color:#a6e22e">instance</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">result</span>, <span style="color:#a6e22e">module</span> };
+</span></span><span style="display:flex;"><span>                        } <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>;
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                    });
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">result</span>.<span style="color:#a6e22e">then</span>(({ <span style="color:#a6e22e">instance</span>, <span style="color:#a6e22e">module</span> }) =&gt; {
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">wasm</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">instance</span>.<span style="color:#a6e22e">exports</span>;
+</span></span><span style="display:flex;"><span>                <span style="color:#a6e22e">init</span>.<span style="color:#a6e22e">__wbindgen_wasm_module</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">module</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">wasm</span>;
+</span></span><span style="display:flex;"><span>            });
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#a6e22e">init</span>;
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">&lt;!-- 기존 코드. type이 inline-module인 것에 유의 --&gt;</span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;inline-module&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;main&#34;</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_base64</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;AGFzbQEAAAABBwFgAn9/AX8DAgEABQMBABEHFAIGbWVtb3J5AgAHYWRkX3R3bwAACg0BCwAgACABakH/AXELAHsJcHJvZHVjZXJzAghsYW5ndWFnZQEEUnVzdAAMcHJvY2Vzc2VkLWJ5AwVydXN0Yx0xLjQxLjAgKDVlMWE3OTk4NCAyMDIwLTAxLTI3KQZ3YWxydXMGMC4xNC4wDHdhc20tYmluZGdlbhIwLjIuNTggKDI5MDJjZWIyNik=&#34;</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_binary</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Uint8Array</span>.<span style="color:#a6e22e">from</span>(<span style="color:#a6e22e">atob</span>(<span style="color:#a6e22e">wasm_base64</span>), <span style="color:#a6e22e">c</span> =&gt; <span style="color:#a6e22e">c</span>.<span style="color:#a6e22e">charCodeAt</span>(<span style="color:#ae81ff">0</span>)).<span style="color:#a6e22e">buffer</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">run</span>() {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">await</span> <span style="color:#a6e22e">init</span>(<span style="color:#a6e22e">wasm_binary</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">result</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">add_two</span>(<span style="color:#ae81ff">1</span>, <span style="color:#ae81ff">2</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">`1 + 2 = </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">result</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">result</span> <span style="color:#f92672">!==</span> <span style="color:#ae81ff">3</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">throw</span> <span style="color:#66d9ef">new</span> Error(<span style="color:#e6db74">&#34;wasm addition doesn&#39;t work!&#34;</span>);
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">run</span>();
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">&lt;!-- ES6 Module Blob 생성 후 해당 URL을 사용하여 임포트하도록, 스크립트 내용을 바꿔치기한다 --&gt;</span>
+</span></span><span style="display:flex;"><span>    &lt;<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_inline</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">&#34;script#wasm-bridge[type=inline-module]&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">wasm_elem</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#34;script&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;type&#34;</span>, <span style="color:#e6db74">&#34;module&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;generated&#34;</span>, <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">wasm_inline</span>.<span style="color:#a6e22e">textContent</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">src</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">URL</span>.<span style="color:#a6e22e">createObjectURL</span>(<span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Blob</span>([<span style="color:#a6e22e">wasm_inline</span>.<span style="color:#a6e22e">textContent</span>], { <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;application/javascript&#34;</span> }));
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">wasm_inline</span>.<span style="color:#a6e22e">replaceWith</span>(<span style="color:#a6e22e">wasm_elem</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">main</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">querySelector</span>(<span style="color:#e6db74">&#34;script#main[type=inline-module]&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">main_replace</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">createElement</span>(<span style="color:#e6db74">&#34;script&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;type&#34;</span>, <span style="color:#e6db74">&#34;module&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">setAttribute</span>(<span style="color:#e6db74">&#34;generated&#34;</span>, <span style="color:#66d9ef">true</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">id</span>) <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">id</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">id</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">main_replace</span>.<span style="color:#a6e22e">textContent</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`/* generated */ import init, { add_two } from &#34;</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">wasm_elem</span>.<span style="color:#a6e22e">src</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;;\n\n`</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">textContent</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">main</span>.<span style="color:#a6e22e">replaceWith</span>(<span style="color:#a6e22e">main_replace</span>)
+</span></span><span style="display:flex;"><span>    &lt;/<span style="color:#f92672">script</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></div><p>여기서 눈여겨볼 점은 <code>main</code> 스크립트의 init() 부분이다. init() 함수는 Uint8Array와 같은 Wasm 바이너리 배열이 주어지면 거기서부터 직접 로드하기 때문에, 이와 같은 작업이 가능하다.</p>
 <h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
 <p>지금까지 HTML 파일 안에 WebAssembly 모듈과 이를 로드하는 ES6 자바스크립트 모듈을 내장하는 방법을 살펴보았다. 언젠가 <code>&lt;script type=&quot;module&quot;&gt;</code> 등에서 직접 Wasm 코드를 임포트하도록 통합되면 이 과정은 더 간단해질 것으로 보인다.</p>
 

@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright>
-    <lastBuildDate>Sun, 20 Feb 2022 21:25:34 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 27 Feb 2022 13:08:18 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Anchor Protocol Summary</title>
+      <link>http://blog.cro.sh/posts/anchor-protocol-summary/</link>
+      <pubDate>Sun, 27 Feb 2022 13:08:18 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/anchor-protocol-summary/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Windows에서 Rust 빌드 환경 컨테이너화하기</title>
       <link>http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/</link>
