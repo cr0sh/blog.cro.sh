@@ -1,4 +1,5 @@
-.highlight pre:hover {
-    float: left;
+.highlight pre :hover {
     min-width: 100%;
+    overflow-x: visible;
+    overflow-y: auto;
 }

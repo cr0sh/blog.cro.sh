@@ -12,8 +12,8 @@
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.">
 <meta name="author" content="">
 <link rel="canonical" href="http://blog.cro.sh/posts/pi-zero-buildroot/" />
-<link crossorigin="anonymous" href="/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css" integrity="sha256-yIlj/i15RiAA/Q&#43;xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.min.4dcb3c4f38462f66c6b6137227726f5543cb934cca9788f041c087e374491df2.js" integrity="sha256-Tcs8TzhGL2bGthNyJ3JvVUPLk0zKl4jwQcCH43RJHfI="
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.e85ad0406048e8176e1c7661b25d5c69297ddfe41dc4124cf75ecb99a4f7b3d1.js" integrity="sha256-6FrQQGBI6BduHHZhsl1caSl93&#43;QdxBJM917LmaT3s9E="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
@@ -22,7 +22,7 @@
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<meta name="generator" content="Hugo 0.93.0" />
+<meta name="generator" content="Hugo 0.101.0" />
 <noscript>
     <style>
         #theme-toggle,
@@ -59,7 +59,7 @@
         }
 
     </style>
-</noscript><meta property="og:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
+</noscript><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><meta property="og:title" content="Raspberry Pi Zero-W에 Buildroot 설치하기 (1)" />
 <meta property="og:description" content="라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
 그러다가 lzn(현재 private)을 개발하면서 &lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다." />
@@ -105,7 +105,7 @@
   "keywords": [
     
   ],
-  "articleBody": "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 ‘이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까’ 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n개발 환경  빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop! OS(Ubuntu) 19.10 파이에 연결할 수 있는 모니터 없음(노트북이니까) UART 시리얼 없음(GPIO 핀 납땜을 안 함) 데이터 통신 가능한 USB 케이블 없음(=OTG로 컴퓨터와 직접 연결 불가) (그나마 믿을 만한) 유일한 통신 수단은 방에 있는 공유기에 Wi-Fi로 연결하는 것  임베디드 리눅스를 모니터 없이 와이파이만으로(…) 디버깅하는 과정을 지금부터 설명하겠다.\nBuildroot 다운로드/설정/빌드하기 먼저, 빌드에 필요한 패키지들을 받아주자.\nsudo apt install gcc make build-essential libncurses5-dev 이게 완전한 리스트는 아니고 첫 빌드 때 한두개씩 누락이 나서 패키지를 설치하라 할 텐데 에러 메시지를 읽고 적절히 설치해주면 된다.\nBuildroot 다운로드 git clone https://github.com/buildroot/buildroot cd buildroot 만약에 개발 버전이 아니라 특정 릴리즈 버전(나는 2019.11-rc3 릴리즈를 사용했다)을 다운로드하고 싶다면, 다음과 같이 입력하면 된다.\ngit checkout tags/2019.11-rc3 Config 조정 Raspberry Zero-W의 기본 설정은 raspberrypi0w_defconfig이다. 해당 설정을 베이스로 조정하면 된다. 그 후 빌드 옵션 GUI를 실행한다.\nmake raspberrypi0w_defconfig make nconfig 중요한 옵션들만 일부 정리해보겠다. 일반적으로 defconfig는 해당 장치에서 간신히 ‘돌아가는’ 기본 설정이기 때문에 중요한 기능들은 모두 꺼져있다. 파이를 ‘쓸 만한’ 장치로 만들기 위해 조정해야 하는 옵션들도 정리할 것이다.\n  Target options: 빌드할 대상 장치(target)에 관한 옵션이다. 여기의 옵션을 바꿀 일은 (거의) 없다.\n  Build options: 빌드 과정에 관한 옵션이다.\n Enable compiler cache: 컴파일 결과물을 캐싱한다. 나는 용량이 부족해서 안 켰지만 켜면 첫 빌드 후 결과물을 계속 재활용할 수 있을 것이다.    Toolchain: 컴파일러 툴체인 관련 설정이다.\n Toolchain type: Buildroot 내장 툴체인(Buildroot toolchain) 또는 외부 툴체인(External toolchain) 중 하나를 고를 수 있다.  Buildroot toolchain: Buildroot 전용 툴체인을 직접 소스에서 빌드한다. make clean을 하면 컴파일러부터 다시 빌드하기 때문에 시간이 조금 걸린다. External toolchain: 외부에서 이미 빌드된 툴체인을 가져와 사용할 수 있다. Linaro GCC를 사용하려 했는데 뭐가 문제인지 부팅이 안 되어서 일단 포기.  Update: armv6 musl toolchain을 사용하면 된다. https://musl.cc/ (비공식 사이트)에서 armv6-linux-musleabihf-cross.tgz를 다운로드하자. Toolchain prefix는 armv6-linux-musleabihf여야 한다.     C library: libc로 사용할 라이브러리다. Rust는 GNU libc에 대한 지원이 더 좋기 때문에1 glibc로 바꾸었다. musl을 사용하고 싶다면 사용하면 된다. Update: ARMv6 MUSL도 이제 Tier 2에 포함되어 동등해졌다. Custom kernel headers series: 바로 위의 Kernel Headers 옵션과 뭐가 다른지 잘 모르겠지만, 커널과 버전이 안 맞으면 에러 난다. 적당히 바꾸자. (나는 4.19.x) Enable C++ support: C++로 작성된 일부 패키지를 빌드하려면 필요하다(ex: vcgencmd). 난 안 써서 비활성화된 상태로 두었다.    System configuration\n System hostname: 설명이 필요 없다. /dev management: Device file 관리 설정이다. 극한의 미니멀리즘을 추구하는 것이 아니라면, mdev나 eudev를 사용하는 것이 좋다. 이들 프로그램이 플러그 앤 플레이 지원을 추가해주는데, 안 쓴다면 직접 수동으로 장치들을 관리해야 한다. Enable root login with password: 주의해야 할 것이 있는데, 이게 켜져 있다고 ssh에서 root로 로그인할 수 있는 것이 아니다(sshd_config에서 PermitRootlogin 항목을 수정해야 함). 일단 활성화 된 상태로 두었다. 아래의 root password도 설정해주자. Root filesystem overlay: 빌드를 모두 끝내고 하나의 이미지로 합치기 전에 해당 디렉토리에 있는 파일들을 복사해오고, 파일이 이미 존재하면 덮어씌운다(overlay). 나는 overlay 폴더로 설정하였다. (buildroot 설치 경로 아래의 상대경로로 인식된다)    Kernel: Linux kernel 설정이다.\n raspberrypi0w_defconfig는 raspberrypi/linux 레포지토리에서 특정 릴리즈의 tarball을 받아와서 사용한다(메인스트림 리눅스에 파이 전용 패치가 추가된 듯?) 그런데 12월 1일 기준 최신 릴리즈는 20190925인데 반영이 안 되어 있다. $(call github,raspberrypi,linux,raspberrypi-kernel_1.20190925-1)/linux-raspberrypi-kernel_1.20190925-1.tar.gz 으로 바꿔주자. 이 경우 Linux 4.19 커널을 사용하게 될 것이다.    Target Packages: 함께 설치되는 프로그램들이다.\n Show packages that are also provided by busybox: busybox가 제공하는 기능과 겹치는 패키지도 설치할 수 있게 해준다. 예를 들어 bash는 이 옵션이 켜져야 사용 가능하다. 다음 프로그램들을 추가로 설치해준다.  Hardware handling-Firmware-rpi-wifi-firmware Hardware handling-rng-tools  라즈베리 파이에 달린 TRNG를 사용해야 /dev/random이 제대로 초기화가 된다. 사용하지 않으면 sshd가 실행되지 않는다. ssh-keygen 프로그램이(혹은 ssh 자체가? 확실하지 않음) /dev/random을 사용하여 난수를 생성하기 때문에 /dev/random이 초기화될 때까지 하염없이 기다리기 때문이다2.   Networking Applications-openssh, wpa_supplicant  Update(2021-12-19): Busybox에서 udhcpcd를 기본 탑재해주기 때문에 dhcpcd는 필요 없다. wpa_supplicant-enable autoscan, syslog support, Install wpa_cli binary/wpa_client shared library/wpa_passphrase binary wpa_cli/wpa_client/wpa_passphrase는 host에서 설정하고 overlay로 넣어주면 되기 때문에 필수는 아니다.        Filesystem Images\n ext2/3/4 root filesystem-exact size: 루트 파일시스템의 크기이다. 120M이면 충분하지만 패키지를 많이 추가하면 용량이 부족할 수 있고 그러면 빌드가 실패한다. 필요할 때 적절히 늘리면 된다.    이 정도 설정하면, Wi-Fi 기능이 활성화된 리눅스를 빌드할 수 있다. 하지만 각 프로그램을 제대로 설정하지 않아 아직은 완벽하지 않다. overlay를 사용한 설정은 다음 게시글에서 다루기로 한다.\n  https://forge.rust-lang.org/release/platform-support.html ↩︎\n https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done ↩︎\n  ",
+  "articleBody": "라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다. 그러다가 lzn(현재 private)을 개발하면서 ‘이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까’ 하는 생각이 들었다. 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 Buildroot으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.\n개발 환경 빌드 장치: Dell XPS 9550 CPU/RAM: Intel Core i7-6700HQ/8GB OS: Pop! OS(Ubuntu) 19.10 파이에 연결할 수 있는 모니터 없음(노트북이니까) UART 시리얼 없음(GPIO 핀 납땜을 안 함) 데이터 통신 가능한 USB 케이블 없음(=OTG로 컴퓨터와 직접 연결 불가) (그나마 믿을 만한) 유일한 통신 수단은 방에 있는 공유기에 Wi-Fi로 연결하는 것 임베디드 리눅스를 모니터 없이 와이파이만으로(…) 디버깅하는 과정을 지금부터 설명하겠다.\nBuildroot 다운로드/설정/빌드하기 먼저, 빌드에 필요한 패키지들을 받아주자.\nsudo apt install gcc make build-essential libncurses5-dev 이게 완전한 리스트는 아니고 첫 빌드 때 한두개씩 누락이 나서 패키지를 설치하라 할 텐데 에러 메시지를 읽고 적절히 설치해주면 된다.\nBuildroot 다운로드 git clone https://github.com/buildroot/buildroot cd buildroot 만약에 개발 버전이 아니라 특정 릴리즈 버전(나는 2019.11-rc3 릴리즈를 사용했다)을 다운로드하고 싶다면, 다음과 같이 입력하면 된다.\ngit checkout tags/2019.11-rc3 Config 조정 Raspberry Zero-W의 기본 설정은 raspberrypi0w_defconfig이다. 해당 설정을 베이스로 조정하면 된다. 그 후 빌드 옵션 GUI를 실행한다.\nmake raspberrypi0w_defconfig make nconfig 중요한 옵션들만 일부 정리해보겠다. 일반적으로 defconfig는 해당 장치에서 간신히 ‘돌아가는’ 기본 설정이기 때문에 중요한 기능들은 모두 꺼져있다. 파이를 ‘쓸 만한’ 장치로 만들기 위해 조정해야 하는 옵션들도 정리할 것이다.\nTarget options: 빌드할 대상 장치(target)에 관한 옵션이다. 여기의 옵션을 바꿀 일은 (거의) 없다.\nBuild options: 빌드 과정에 관한 옵션이다.\nEnable compiler cache: 컴파일 결과물을 캐싱한다. 나는 용량이 부족해서 안 켰지만 켜면 첫 빌드 후 결과물을 계속 재활용할 수 있을 것이다. Toolchain: 컴파일러 툴체인 관련 설정이다.\nToolchain type: Buildroot 내장 툴체인(Buildroot toolchain) 또는 외부 툴체인(External toolchain) 중 하나를 고를 수 있다. Buildroot toolchain: Buildroot 전용 툴체인을 직접 소스에서 빌드한다. make clean을 하면 컴파일러부터 다시 빌드하기 때문에 시간이 조금 걸린다. External toolchain: 외부에서 이미 빌드된 툴체인을 가져와 사용할 수 있다. Linaro GCC를 사용하려 했는데 뭐가 문제인지 부팅이 안 되어서 일단 포기. Update: armv6 musl toolchain을 사용하면 된다. https://musl.cc/ (비공식 사이트)에서 armv6-linux-musleabihf-cross.tgz를 다운로드하자. Toolchain prefix는 armv6-linux-musleabihf여야 한다. C library: libc로 사용할 라이브러리다. Rust는 GNU libc에 대한 지원이 더 좋기 때문에1 glibc로 바꾸었다. musl을 사용하고 싶다면 사용하면 된다. Update: ARMv6 MUSL도 이제 Tier 2에 포함되어 동등해졌다. Custom kernel headers series: 바로 위의 Kernel Headers 옵션과 뭐가 다른지 잘 모르겠지만, 커널과 버전이 안 맞으면 에러 난다. 적당히 바꾸자. (나는 4.19.x) Enable C++ support: C++로 작성된 일부 패키지를 빌드하려면 필요하다(ex: vcgencmd). 난 안 써서 비활성화된 상태로 두었다. System configuration\nSystem hostname: 설명이 필요 없다. /dev management: Device file 관리 설정이다. 극한의 미니멀리즘을 추구하는 것이 아니라면, mdev나 eudev를 사용하는 것이 좋다. 이들 프로그램이 플러그 앤 플레이 지원을 추가해주는데, 안 쓴다면 직접 수동으로 장치들을 관리해야 한다. Enable root login with password: 주의해야 할 것이 있는데, 이게 켜져 있다고 ssh에서 root로 로그인할 수 있는 것이 아니다(sshd_config에서 PermitRootlogin 항목을 수정해야 함). 일단 활성화 된 상태로 두었다. 아래의 root password도 설정해주자. Root filesystem overlay: 빌드를 모두 끝내고 하나의 이미지로 합치기 전에 해당 디렉토리에 있는 파일들을 복사해오고, 파일이 이미 존재하면 덮어씌운다(overlay). 나는 overlay 폴더로 설정하였다. (buildroot 설치 경로 아래의 상대경로로 인식된다) Kernel: Linux kernel 설정이다.\nraspberrypi0w_defconfig는 raspberrypi/linux 레포지토리에서 특정 릴리즈의 tarball을 받아와서 사용한다(메인스트림 리눅스에 파이 전용 패치가 추가된 듯?) 그런데 12월 1일 기준 최신 릴리즈는 20190925인데 반영이 안 되어 있다. $(call github,raspberrypi,linux,raspberrypi-kernel_1.20190925-1)/linux-raspberrypi-kernel_1.20190925-1.tar.gz 으로 바꿔주자. 이 경우 Linux 4.19 커널을 사용하게 될 것이다. Target Packages: 함께 설치되는 프로그램들이다.\nShow packages that are also provided by busybox: busybox가 제공하는 기능과 겹치는 패키지도 설치할 수 있게 해준다. 예를 들어 bash는 이 옵션이 켜져야 사용 가능하다. 다음 프로그램들을 추가로 설치해준다. Hardware handling-\u003eFirmware-\u003erpi-wifi-firmware Hardware handling-\u003erng-tools 라즈베리 파이에 달린 TRNG를 사용해야 /dev/random이 제대로 초기화가 된다. 사용하지 않으면 sshd가 실행되지 않는다. ssh-keygen 프로그램이(혹은 ssh 자체가? 확실하지 않음) /dev/random을 사용하여 난수를 생성하기 때문에 /dev/random이 초기화될 때까지 하염없이 기다리기 때문이다2. Networking Applications-\u003eopenssh, wpa_supplicant Update(2021-12-19): Busybox에서 udhcpcd를 기본 탑재해주기 때문에 dhcpcd는 필요 없다. wpa_supplicant-\u003eenable autoscan, syslog support, Install wpa_cli binary/wpa_client shared library/wpa_passphrase binary wpa_cli/wpa_client/wpa_passphrase는 host에서 설정하고 overlay로 넣어주면 되기 때문에 필수는 아니다. Filesystem Images\next2/3/4 root filesystem-\u003eexact size: 루트 파일시스템의 크기이다. 120M이면 충분하지만 패키지를 많이 추가하면 용량이 부족할 수 있고 그러면 빌드가 실패한다. 필요할 때 적절히 늘리면 된다. 이 정도 설정하면, Wi-Fi 기능이 활성화된 리눅스를 빌드할 수 있다. 하지만 각 프로그램을 제대로 설정하지 않아 아직은 완벽하지 않다. overlay를 사용한 설정은 다음 게시글에서 다루기로 한다.\nhttps://forge.rust-lang.org/release/platform-support.html ↩︎\nhttps://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done ↩︎\n",
   "wordCount" : "708",
   "inLanguage": "en",
   "datePublished": "2019-12-01T19:19:27+09:00",
@@ -177,8 +177,7 @@
     <h1 class="post-title">
       Raspberry Pi Zero-W에 Buildroot 설치하기 (1)
     </h1>
-    <div class="post-meta"><span title='2019-12-01 19:19:27 +0900 KST'>December 1, 2019</span>
-
+    <div class="post-meta">December 1, 2019
 </div>
   </header> 
   <div class="post-content"><p>라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
@@ -284,17 +283,17 @@
 </li>
 </ul>
 <p>이 정도 설정하면, Wi-Fi 기능이 활성화된 리눅스를 빌드할 수 있다. 하지만 각 프로그램을 제대로 설정하지 않아 아직은 완벽하지 않다. overlay를 사용한 설정은 다음 게시글에서 다루기로 한다.</p>
-<section class="footnotes" role="doc-endnotes">
+<div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
-<li id="fn:1" role="doc-endnote">
+<li id="fn:1">
 <p><a href="https://forge.rust-lang.org/release/platform-support.html">https://forge.rust-lang.org/release/platform-support.html</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
-<li id="fn:2" role="doc-endnote">
+<li id="fn:2">
 <p><a href="https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done">https://unix.stackexchange.com/questions/442698/when-i-log-in-it-hangs-until-crng-init-done</a>&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
-</section>
+</div>
 
   </div>
 
@@ -316,14 +315,15 @@
         <path d="M12 6H0l6-6z" />
     </svg>
 </a>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "152863abaa9948f9bb84e53ef4204e47"}'></script>
+
 
 <script>
     let menu = document.getElementById('menu')
-    if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
+    menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+    menu.onscroll = function () {
+        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

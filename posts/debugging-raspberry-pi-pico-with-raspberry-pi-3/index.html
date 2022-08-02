@@ -12,8 +12,8 @@
 Buildroot을 사용하여 구성하였다.">
 <meta name="author" content="">
 <link rel="canonical" href="http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/" />
-<link crossorigin="anonymous" href="/assets/css/stylesheet.min.c88963fe2d79462000fd0fb1b3737783c32855d340583e4523343f8735c787f0.css" integrity="sha256-yIlj/i15RiAA/Q&#43;xs3N3g8MoVdNAWD5FIzQ/hzXHh/A=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.min.4dcb3c4f38462f66c6b6137227726f5543cb934cca9788f041c087e374491df2.js" integrity="sha256-Tcs8TzhGL2bGthNyJ3JvVUPLk0zKl4jwQcCH43RJHfI="
+<link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.min.e85ad0406048e8176e1c7661b25d5c69297ddfe41dc4124cf75ecb99a4f7b3d1.js" integrity="sha256-6FrQQGBI6BduHHZhsl1caSl93&#43;QdxBJM917LmaT3s9E="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
@@ -22,7 +22,7 @@ Buildroot을 사용하여 구성하였다.">
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<meta name="generator" content="Hugo 0.93.0" />
+<meta name="generator" content="Hugo 0.101.0" />
 <noscript>
     <style>
         #theme-toggle,
@@ -59,7 +59,7 @@ Buildroot을 사용하여 구성하였다.">
         }
 
     </style>
-</noscript><meta property="og:title" content="파이로 파이 Pico 디버깅하기 (w/ buildroot)" />
+</noscript><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><meta property="og:title" content="파이로 파이 Pico 디버깅하기 (w/ buildroot)" />
 <meta property="og:description" content="라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서,
 가지고 있던 라즈베리 파이 3을 이용해보기로 했다. 최대한 미니멀한 환경을 원했기 때문에 예전과 같이
 Buildroot을 사용하여 구성하였다." />
@@ -105,7 +105,7 @@ Buildroot을 사용하여 구성하였다."/>
   "keywords": [
     
   ],
-  "articleBody": "라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서, 가지고 있던 라즈베리 파이 3을 이용해보기로 했다. 최대한 미니멀한 환경을 원했기 때문에 예전과 같이 Buildroot을 사용하여 구성하였다.\n시작하기 전에 Buildroot에 관한 초기 세팅은 여기를 참고하자. 이 포스트는 최신 안정 버전인 Buildroot 2021.11.x 버전을 기준으로 하여 작성되었다.\nBuildroot 환경 구성 Defconfig: Raspberry Pi 3 (64-bit) make raspberrypi3_64_defconfig Toolchain Toolchain type에서 External toolchain, Toolchain에서 Arm AArch64 2021.07을 선택했다. Buildroot toolchain을 써도 큰 문제는 없겠지만 컴파일 시간을 줄이기 위해 pre-built ARM 툴체인을 사용한다.\nSystem configuration  /dev management: devtmpfs + mdev. 장치 추가를 자동으로 해 주니 편해진다. Root password: 적절히 설정해준다. Install timezone info: 활성화하고 기본 시간대를 Asia/Seoul로 설정해줬다. Root filesystem overlay directories: 파일시스템 오버레이가 필요하면 넣는다. (내 경우에는 /etc/network/interfaces나 sshd_config를 이걸로 설정했다.)  Kernel Defconfig에서 추가로 건드릴 사항 없었다.\nTarget Packages 위의 Pi Zero Headless 셋업에서 추가한 패키지와 더불어, Hardware Handling - openocd 패키지를 추가하고 두 어댑터를 추가해야 한다.\n bitbanging on BCM2835 programming via sysfs gpios  문제는 위의 bitbanging on BCM2837는 BR2_arm config가 활성화되어 있을 때만 사용 가능하고, 이는 BR2_aarch64와 별개이기 때문에 64비트 라즈베리 파이 3 시스템에서는 보이지 않는다. 이를 위해 다음과 같은 패치를 임시로 적용하였다.\ndiff --git a/package/openocd/Config.in b/package/openocd/Config.in index b14f940b27..bdc6794123 100644 --- a/package/openocd/Config.in +++ b/package/openocd/Config.in @@ -190,13 +190,17 @@ config BR2_PACKAGE_OPENOCD_AT91RM  help  Enable building support for AT91RM9200 based SBCs  +endif # BR2_arm + +if (BR2_arm || BR2_aarch64) +  config BR2_PACKAGE_OPENOCD_BCM2835  bool \"bitbanging on BCM2835\"  help  Enable building support for bitbanging on BCM2835  (as found in Raspberry Pi)  -endif # BR2_arm +endif # BR2_arm || BR2_aarch64   config BR2_PACKAGE_OPENOCD_GW16012  bool \"Gateworks GW16012 JTAG Programmer\" (사용 방법: 해당 파일을 Buildroot 최상단 디렉토리에 openocd.patch라는 이름으로 저장해두고, patch -p1 로 적용한다.)\n다시 명시하지만 이 패치는 Buildroot 2021.11.x 기준으로 작성되었기 때문에 추후 버전에서는 conflict가 발생할 수도 있다.\n추가로, RP2040 타겟을 위해 라즈베리 파이 재단이 OpenOCD를 포크하여 관련 드라이버를 구현한 것으로 보인다. Buildroot가 다운로드하는 OpenOCD에는 이것이 반영되어 있지 않으므로 해당 포크의 base version인 0.11.0과 포크 버전의 diff를 만들어서 패키지 패치 목록에 추가하였다. 패치 내역이 기므로 Github Gist로 갈음한다. https://gist.github.com/cr0sh/1920833b7b7ecd40f3c605f49dd32c84\n해당 파일을 package/openocd/ 안에 동일한 파일명으로 집어넣으면 알아서 빌드 시에 패치가 적용된다.\n(사실 정공법은 openocd.mk를 수정해서 소스 tarball을 다운로드받는 경로를 수정하는 것이었겠지만, 귀찮아서 이런 방식으로 우회했다. 앞으로 OpenOCD 버전이 0.11.0 위로 업그레이드되면 이 diff가 깨질 확률이 높으므로 알아서 수정 바람)\n빌드 make 이후 output/images/sdcard.img를 플래싱한다.\nOpenOCD 핀 세팅 Pico의 SWD 핀을 라즈베리 파이의 GPIO 핀에 연결해야 한다. (Pico와 파이 모두 전원을 뽑고 진행해야 한다. 안 그럼 오작동한다고 한다.) SWD 핀은 피코의 전원 플러그와 정반대에 위치해 있고, pre-soldered version을 구매해도 납땜이 되지 않은 상태로 오기 때문에 따로 납땜해야 한다.\n 나는 납땜기가 없어서 Pimoroni사의 GPIO Hammer Header를 가위로 잘라서 꽂았다. (핀 수가 적기 때문에 망치질을 하지 않고 가위 끝 등으로 힘을 적당히 주면 하나씩 들어간다. 너무 많이 들어가면 반대방향으로 핀이 빠지므로 힘조절에 주의)  핀 연결은 다음과 같다.\n   Pico Pi     SWDIO GPIO24   SWDGND GND   SWDCLK GPIO25    세 핀의 순서가 양 기기에서 똑같기 때문에 점퍼선을 많이 조각내도 되지 않아서 좋았다. 다 염두에 두고 핀을 구성한건가?\nOpenOCD 시작 이제 파이를 켜고, 루트 쉘에 접속해서(시리얼, SSH 등…) 다음과 같이 입력한다.\n# openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c 'bindto 0.0.0.0' Open On-Chip Debugger 0.11.0 Licensed under GNU GPL v2 For bug reports, read http://openocd.org/doc/doxygen/bugs.html adapter speed: 1000 kHz Info : Hardware thread awareness created Info : Hardware thread awareness created Info : RP2040 Flash Bank Command Info : Listening on port 6666 for tcl connections Info : Listening on port 4444 for telnet connections Info : BCM2835 GPIO JTAG/SWD bitbang driver Info : clock speed 1001 kHz Info : SWD DPIDR 0x0bc12477 Info : SWD DLPIDR 0x00000001 Info : SWD DPIDR 0x0bc12477 Info : SWD DLPIDR 0x10000001 Info : rp2040.core0: hardware has 4 breakpoints, 2 watchpoints Info : rp2040.core1: hardware has 4 breakpoints, 2 watchpoints Info : starting gdb server for rp2040.core0 on 3333 Info : Listening on port 3333 for gdb connections Info : accepting 'gdb' connection on tcp/3333 -c 'bindto 0.0.0.0'은 파이 외부에서 GDB 서버에 접속하기 위해 필요하다(기본적으로 localhost에 바인드되어 외부에서 접근할 수 없다). OpenOCD가 정상적으로 실행되었고 SWD 인터페이스와의 연결도 잘 이루어졌음을 확인할 수 있다.\nInfo : Read incorrect DLIPDR 00000000 (possibly CTRL/STAT value) when selecting coreid 0 Info : DAP init failed Info : Read incorrect DLIPDR 00000000 (possibly CTRL/STAT value) when selecting coreid 0 이런 오류가 발생하고 중지된다면 아마 핀 연결이 잘못되었거나 Pico의 전원을 넣어야 동작하는 것일 수도 있다.\narm-none-eabi GCC 툴체인 설치 https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads 여기서 호스트 시스템에 맞게 최신 버전을 설치한다.\n샘플 프로젝트 빌드 \u0026 GDB remote target 연결 cargo install flip-link cargo install probe-run rustup target add thumbv6m-none-eabi git clone https://github.com/rp-rs/rp2040-project-template \u0026\u0026 cd rp2040-project-template cargo build --release arm-none-eabi-gdb target/thumbv6m-none-eabi/release/rp2040-project-template GDB가 열리면 target remote :3333 으로 연결 후 load 명령으로 로드한다. 이후 일반적인 GDB처럼 사용할 수 있다.\nHappy hacking!\nReferences  https://www.electronicshub.org/programming-raspberry-pi-pico-with-swd/ ",
+  "articleBody": "라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서, 가지고 있던 라즈베리 파이 3을 이용해보기로 했다. 최대한 미니멀한 환경을 원했기 때문에 예전과 같이 Buildroot을 사용하여 구성하였다.\n시작하기 전에 Buildroot에 관한 초기 세팅은 여기를 참고하자. 이 포스트는 최신 안정 버전인 Buildroot 2021.11.x 버전을 기준으로 하여 작성되었다.\nBuildroot 환경 구성 Defconfig: Raspberry Pi 3 (64-bit) make raspberrypi3_64_defconfig Toolchain Toolchain type에서 External toolchain, Toolchain에서 Arm AArch64 2021.07을 선택했다. Buildroot toolchain을 써도 큰 문제는 없겠지만 컴파일 시간을 줄이기 위해 pre-built ARM 툴체인을 사용한다.\nSystem configuration /dev management: devtmpfs + mdev. 장치 추가를 자동으로 해 주니 편해진다. Root password: 적절히 설정해준다. Install timezone info: 활성화하고 기본 시간대를 Asia/Seoul로 설정해줬다. Root filesystem overlay directories: 파일시스템 오버레이가 필요하면 넣는다. (내 경우에는 /etc/network/interfaces나 sshd_config를 이걸로 설정했다.) Kernel Defconfig에서 추가로 건드릴 사항 없었다.\nTarget Packages 위의 Pi Zero Headless 셋업에서 추가한 패키지와 더불어, Hardware Handling -\u003e openocd 패키지를 추가하고 두 어댑터를 추가해야 한다.\nbitbanging on BCM2835 programming via sysfs gpios 문제는 위의 bitbanging on BCM2837는 BR2_arm config가 활성화되어 있을 때만 사용 가능하고, 이는 BR2_aarch64와 별개이기 때문에 64비트 라즈베리 파이 3 시스템에서는 보이지 않는다. 이를 위해 다음과 같은 패치를 임시로 적용하였다.\ndiff --git a/package/openocd/Config.in b/package/openocd/Config.in index b14f940b27..bdc6794123 100644 --- a/package/openocd/Config.in +++ b/package/openocd/Config.in @@ -190,13 +190,17 @@ config BR2_PACKAGE_OPENOCD_AT91RM help Enable building support for AT91RM9200 based SBCs +endif # BR2_arm + +if (BR2_arm || BR2_aarch64) + config BR2_PACKAGE_OPENOCD_BCM2835 bool \"bitbanging on BCM2835\" help Enable building support for bitbanging on BCM2835 (as found in Raspberry Pi) -endif # BR2_arm +endif # BR2_arm || BR2_aarch64 config BR2_PACKAGE_OPENOCD_GW16012 bool \"Gateworks GW16012 JTAG Programmer\" (사용 방법: 해당 파일을 Buildroot 최상단 디렉토리에 openocd.patch라는 이름으로 저장해두고, patch -p1 \u003c openocd.patch로 적용한다.)\n다시 명시하지만 이 패치는 Buildroot 2021.11.x 기준으로 작성되었기 때문에 추후 버전에서는 conflict가 발생할 수도 있다.\n추가로, RP2040 타겟을 위해 라즈베리 파이 재단이 OpenOCD를 포크하여 관련 드라이버를 구현한 것으로 보인다. Buildroot가 다운로드하는 OpenOCD에는 이것이 반영되어 있지 않으므로 해당 포크의 base version인 0.11.0과 포크 버전의 diff를 만들어서 패키지 패치 목록에 추가하였다. 패치 내역이 기므로 Github Gist로 갈음한다. https://gist.github.com/cr0sh/1920833b7b7ecd40f3c605f49dd32c84\n해당 파일을 package/openocd/ 안에 동일한 파일명으로 집어넣으면 알아서 빌드 시에 패치가 적용된다.\n(사실 정공법은 openocd.mk를 수정해서 소스 tarball을 다운로드받는 경로를 수정하는 것이었겠지만, 귀찮아서 이런 방식으로 우회했다. 앞으로 OpenOCD 버전이 0.11.0 위로 업그레이드되면 이 diff가 깨질 확률이 높으므로 알아서 수정 바람)\n빌드 make 이후 output/images/sdcard.img를 플래싱한다.\nOpenOCD 핀 세팅 Pico의 SWD 핀을 라즈베리 파이의 GPIO 핀에 연결해야 한다. (Pico와 파이 모두 전원을 뽑고 진행해야 한다. 안 그럼 오작동한다고 한다.) SWD 핀은 피코의 전원 플러그와 정반대에 위치해 있고, pre-soldered version을 구매해도 납땜이 되지 않은 상태로 오기 때문에 따로 납땜해야 한다.\n나는 납땜기가 없어서 Pimoroni사의 GPIO Hammer Header를 가위로 잘라서 꽂았다. (핀 수가 적기 때문에 망치질을 하지 않고 가위 끝 등으로 힘을 적당히 주면 하나씩 들어간다. 너무 많이 들어가면 반대방향으로 핀이 빠지므로 힘조절에 주의) 핀 연결은 다음과 같다.\nPico Pi SWDIO GPIO24 SWDGND GND SWDCLK GPIO25 세 핀의 순서가 양 기기에서 똑같기 때문에 점퍼선을 많이 조각내도 되지 않아서 좋았다. 다 염두에 두고 핀을 구성한건가?\nOpenOCD 시작 이제 파이를 켜고, 루트 쉘에 접속해서(시리얼, SSH 등…) 다음과 같이 입력한다.\n# openocd -f interface/raspberrypi-swd.cfg -f target/rp2040.cfg -c 'bindto 0.0.0.0' Open On-Chip Debugger 0.11.0 Licensed under GNU GPL v2 For bug reports, read http://openocd.org/doc/doxygen/bugs.html adapter speed: 1000 kHz Info : Hardware thread awareness created Info : Hardware thread awareness created Info : RP2040 Flash Bank Command Info : Listening on port 6666 for tcl connections Info : Listening on port 4444 for telnet connections Info : BCM2835 GPIO JTAG/SWD bitbang driver Info : clock speed 1001 kHz Info : SWD DPIDR 0x0bc12477 Info : SWD DLPIDR 0x00000001 Info : SWD DPIDR 0x0bc12477 Info : SWD DLPIDR 0x10000001 Info : rp2040.core0: hardware has 4 breakpoints, 2 watchpoints Info : rp2040.core1: hardware has 4 breakpoints, 2 watchpoints Info : starting gdb server for rp2040.core0 on 3333 Info : Listening on port 3333 for gdb connections Info : accepting 'gdb' connection on tcp/3333 -c 'bindto 0.0.0.0'은 파이 외부에서 GDB 서버에 접속하기 위해 필요하다(기본적으로 localhost에 바인드되어 외부에서 접근할 수 없다). OpenOCD가 정상적으로 실행되었고 SWD 인터페이스와의 연결도 잘 이루어졌음을 확인할 수 있다.\nInfo : Read incorrect DLIPDR 00000000 (possibly CTRL/STAT value) when selecting coreid 0 Info : DAP init failed Info : Read incorrect DLIPDR 00000000 (possibly CTRL/STAT value) when selecting coreid 0 이런 오류가 발생하고 중지된다면 아마 핀 연결이 잘못되었거나 Pico의 전원을 넣어야 동작하는 것일 수도 있다.\narm-none-eabi GCC 툴체인 설치 https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads 여기서 호스트 시스템에 맞게 최신 버전을 설치한다.\n샘플 프로젝트 빌드 \u0026 GDB remote target 연결 cargo install flip-link cargo install probe-run rustup target add thumbv6m-none-eabi git clone https://github.com/rp-rs/rp2040-project-template \u0026\u0026 cd rp2040-project-template cargo build --release arm-none-eabi-gdb target/thumbv6m-none-eabi/release/rp2040-project-template GDB가 열리면 target remote :3333 으로 연결 후 load 명령으로 로드한다. 이후 일반적인 GDB처럼 사용할 수 있다.\nHappy hacking!\nReferences https://www.electronicshub.org/programming-raspberry-pi-pico-with-swd/ ",
   "wordCount" : "765",
   "inLanguage": "en",
   "datePublished": "2021-12-19T11:32:19+09:00",
@@ -177,8 +177,7 @@ Buildroot을 사용하여 구성하였다."/>
     <h1 class="post-title">
       파이로 파이 Pico 디버깅하기 (w/ buildroot)
     </h1>
-    <div class="post-meta"><span title='2021-12-19 11:32:19 +0900 KST'>December 19, 2021</span>
-
+    <div class="post-meta">December 19, 2021
 </div>
   </header> 
   <div class="post-content"><p>라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서,
@@ -347,14 +346,15 @@ arm-none-eabi-gdb target/thumbv6m-none-eabi/release/rp2040-project-template
         <path d="M12 6H0l6-6z" />
     </svg>
 </a>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "152863abaa9948f9bb84e53ef4204e47"}'></script>
+
 
 <script>
     let menu = document.getElementById('menu')
-    if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-        menu.onscroll = function () {
-            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
-        }
+    menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+    menu.onscroll = function () {
+        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
