@@ -7,7 +7,17 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright>
-    <lastBuildDate>Sun, 27 Feb 2022 13:08:18 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 15 Aug 2022 23:22:43 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Asynchronous Rust</title>
+      <link>http://blog.cro.sh/posts/asynchronous-rust/</link>
+      <pubDate>Mon, 15 Aug 2022 23:22:43 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/asynchronous-rust/</guid>
+      <description>&lt;p&gt;최근에 근무 중인 직장에서 비동기 Rust 프로그래밍에 대해 발표하게 되어 자료를 공유한다.&lt;/p&gt;
+&lt;p&gt;채용 홍보도 겸하는데 Rust에 관심있는 사람들은 확인해보면 좋을 듯 하다.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Anchor Protocol Summary</title>
       <link>http://blog.cro.sh/posts/anchor-protocol-summary/</link>
