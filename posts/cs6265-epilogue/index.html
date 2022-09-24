@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
 <title>CS6265 Epilogue | Option::None</title>
-<meta name="keywords" content="" />
+<meta name="keywords" content="">
 <meta name="description" content="동계 디지털 국제 계절수업 프로그램을 통해 조지아 공대의
 Information Security Lab (CS6265)
 수업을 들어볼 수 있었다. 겨울방학 동한 공부한 컴퓨터 보안에 대해 정리해보고자 한다.
 당연히 이 글을 읽는 누군가는 이 수업을 들을 수도 있기 때문에, 스포일러는 최대한 자제할 것이다. 무엇을 배웠는지 위주로 정리한다.">
 <meta name="author" content="">
-<link rel="canonical" href="http://blog.cro.sh/posts/cs6265-epilogue/" />
-<link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+<link rel="canonical" href="http://blog.cro.sh/posts/cs6265-epilogue/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
@@ -23,7 +23,6 @@ Information Security Lab (CS6265)
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<meta name="generator" content="Hugo 0.104.0" />
 <noscript>
     <style>
         #theme-toggle,
@@ -67,8 +66,8 @@ Information Security Lab (CS6265)
 당연히 이 글을 읽는 누군가는 이 수업을 들을 수도 있기 때문에, 스포일러는 최대한 자제할 것이다. 무엇을 배웠는지 위주로 정리한다." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://blog.cro.sh/posts/cs6265-epilogue/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2021-02-14T16:44:32&#43;09:00" />
-<meta property="article:modified_time" content="2021-02-14T16:44:32&#43;09:00" />
+<meta property="article:published_time" content="2021-02-14T16:44:32+09:00" />
+<meta property="article:modified_time" content="2021-02-14T16:44:32+09:00" />
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="CS6265 Epilogue"/>
@@ -145,14 +144,14 @@ Information Security Lab (CS6265)
     <nav class="nav">
         <div class="logo">
             <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
-            <span class="logo-switches">
+            <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -166,7 +165,7 @@ Information Security Lab (CS6265)
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
-            </span>
+            </div>
         </div>
         <ul id="menu">
         </ul>
@@ -180,7 +179,8 @@ Information Security Lab (CS6265)
     <h1 class="post-title">
       CS6265 Epilogue
     </h1>
-    <div class="post-meta">February 14, 2021
+    <div class="post-meta"><span title='2021-02-14 16:44:32 +0900 KST'>February 14, 2021</span>
+
 </div>
   </header> 
   <div class="post-content"><p>동계 디지털 국제 계절수업 프로그램을 통해 조지아 공대의
@@ -324,6 +324,8 @@ Information Security Lab (CS6265)
   </div>
 
   <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
   </footer>
 </article>
     </main>
@@ -333,7 +335,7 @@ Information Security Lab (CS6265)
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
     </span>
 </footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
@@ -347,9 +349,11 @@ Information Security Lab (CS6265)
 
 <script>
     let menu = document.getElementById('menu')
-    menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-    menu.onscroll = function () {
-        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

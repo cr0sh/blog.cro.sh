@@ -6,14 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
 <title>파이로 파이 Pico 디버깅하기 (w/ buildroot) | Option::None</title>
-<meta name="keywords" content="" />
+<meta name="keywords" content="">
 <meta name="description" content="라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서,
 가지고 있던 라즈베리 파이 3을 이용해보기로 했다. 최대한 미니멀한 환경을 원했기 때문에 예전과 같이
 Buildroot을 사용하여 구성하였다.">
 <meta name="author" content="">
-<link rel="canonical" href="http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/" />
-<link crossorigin="anonymous" href="/assets/css/stylesheet.min.5e2b4101351c21e906f398ae96901791830f58d430f96f2659dab7eaef7b3cb7.css" integrity="sha256-XitBATUcIekG85iulpAXkYMPWNQw&#43;W8mWdq36u97PLc=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.min.b95bacdc39e37a332a9f883b1e78be4abc1fdca2bc1f2641f55e3cd3dabd4d61.js" integrity="sha256-uVus3DnjejMqn4g7Hni&#43;Srwf3KK8HyZB9V4809q9TWE="
+<link rel="canonical" href="http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bc1149f4a72aa4858d3a9f71462f75e5884ffe8073ea9d6d5761d5663d651e20.css" integrity="sha256-vBFJ9KcqpIWNOp9xRi915YhP/oBz6p1tV2HVZj1lHiA=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
     onload="hljs.initHighlightingOnLoad();"></script>
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
@@ -22,7 +22,6 @@ Buildroot을 사용하여 구성하였다.">
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<meta name="generator" content="Hugo 0.104.0" />
 <noscript>
     <style>
         #theme-toggle,
@@ -65,8 +64,8 @@ Buildroot을 사용하여 구성하였다.">
 Buildroot을 사용하여 구성하였다." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2021-12-19T11:32:19&#43;09:00" />
-<meta property="article:modified_time" content="2021-12-19T11:32:19&#43;09:00" />
+<meta property="article:published_time" content="2021-12-19T11:32:19+09:00" />
+<meta property="article:modified_time" content="2021-12-19T11:32:19+09:00" />
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="파이로 파이 Pico 디버깅하기 (w/ buildroot)"/>
@@ -142,14 +141,14 @@ Buildroot을 사용하여 구성하였다."/>
     <nav class="nav">
         <div class="logo">
             <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
-            <span class="logo-switches">
+            <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -163,7 +162,7 @@ Buildroot을 사용하여 구성하였다."/>
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
-            </span>
+            </div>
         </div>
         <ul id="menu">
         </ul>
@@ -177,7 +176,8 @@ Buildroot을 사용하여 구성하였다."/>
     <h1 class="post-title">
       파이로 파이 Pico 디버깅하기 (w/ buildroot)
     </h1>
-    <div class="post-meta">December 19, 2021
+    <div class="post-meta"><span title='2021-12-19 11:32:19 +0900 KST'>December 19, 2021</span>
+
 </div>
   </header> 
   <div class="post-content"><p>라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서,
@@ -329,6 +329,8 @@ arm-none-eabi-gdb target/thumbv6m-none-eabi/release/rp2040-project-template
   </div>
 
   <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
   </footer>
 </article>
     </main>
@@ -338,7 +340,7 @@ arm-none-eabi-gdb target/thumbv6m-none-eabi/release/rp2040-project-template
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
-        <a href="https://git.io/hugopapermod" rel="noopener" target="_blank">PaperMod</a>
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
     </span>
 </footer>
 <a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
@@ -352,9 +354,11 @@ arm-none-eabi-gdb target/thumbv6m-none-eabi/release/rp2040-project-template
 
 <script>
     let menu = document.getElementById('menu')
-    menu.scrollLeft = localStorage.getItem("menu-scroll-position");
-    menu.onscroll = function () {
-        localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
