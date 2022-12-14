@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://blog.cro.sh/posts/asynchronous-rust/</loc>
-    <lastmod>2022-08-15T23:22:43+09:00</lastmod>
+    <loc>http://blog.cro.sh/posts/four-years-of-rust/</loc>
+    <lastmod>2022-12-11T15:19:56+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/</loc>
-    <lastmod>2022-08-15T23:22:43+09:00</lastmod>
+    <lastmod>2022-12-11T15:19:56+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/posts/</loc>
+    <lastmod>2022-12-11T15:19:56+09:00</lastmod>
+  </url><url>
+    <loc>http://blog.cro.sh/posts/asynchronous-rust/</loc>
     <lastmod>2022-08-15T23:22:43+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/posts/anchor-protocol-summary/</loc>
