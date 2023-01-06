@@ -1,5 +1,3 @@
-.highlight pre :hover {
-    min-width: 100%;
-    overflow-x: visible;
-    overflow-y: auto;
+div.highlight:hover {
+    min-width: fit-content;
 }
