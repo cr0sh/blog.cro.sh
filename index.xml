@@ -6,7 +6,7 @@
     <description>Recent content on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
-    <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright>
+    <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
     <lastBuildDate>Sat, 07 Jan 2023 23:26:51 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Rust의 에러 처리, Part 1</title>
@@ -120,6 +120,7 @@ Buildroot을 사용하여 구성하였다.&lt;/p&gt;</description>
 그러다가 &lt;a href=&#34;https://github.com/cr0sh/lzn&#34;&gt;lzn&lt;/a&gt;(현재 private)을 개발하면서 &amp;lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&amp;rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 &lt;a href=&#34;https://buildroot.org&#34;&gt;Buildroot&lt;/a&gt;으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.&lt;/p&gt;</description>
     </item>
+    
     
   </channel>
 </rss>

@@ -6,7 +6,7 @@
     <description>Recent content in Posts on Option::None</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
-    <copyright>&amp;copy; 2019-2021 Nam Junghyun</copyright>
+    <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
     <lastBuildDate>Sat, 07 Jan 2023 23:26:51 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Rust의 에러 처리, Part 1</title>
