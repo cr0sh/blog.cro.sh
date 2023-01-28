@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Rust의 에러 처리, Part 2 | Option::None</title>
+<meta name="keywords" content="">
+<meta name="description" content="[Rust의 에러 처리, Part 1]에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.">
+<meta name="author" content="">
+<link rel="canonical" href="http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.bccfefac377bc340f06c260aed1bddf49a4354816d7c570d6aac75a997986c95.css" integrity="sha256-vM/vrDd7w0DwbCYK7Rvd9JpDVIFtfFcNaqx1qZeYbJU=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://blog.cro.sh/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://blog.cro.sh/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://blog.cro.sh/apple-touch-icon.png">
+<link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><link rel="stylesheet" href="http://blog.cro.sh/css/fix-ios-hljs.css"><meta property="og:title" content="Rust의 에러 처리, Part 2" />
+<meta property="og:description" content="[Rust의 에러 처리, Part 1]에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-01-26T20:58:44+09:00" />
+<meta property="article:modified_time" content="2023-01-26T20:58:44+09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Rust의 에러 처리, Part 2"/>
+<meta name="twitter:description" content="[Rust의 에러 처리, Part 1]에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://blog.cro.sh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Rust의 에러 처리, Part 2",
+      "item": "http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Rust의 에러 처리, Part 2",
+  "name": "Rust의 에러 처리, Part 2",
+  "description": "[Rust의 에러 처리, Part 1]에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "[Rust의 에러 처리, Part 1]에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.\ntrait Error Rust 에러 처리의 두 번째 중추는 Error 트레잇이다.\npub trait Error: Debug + Display { fn source(\u0026self) -\u003e Option\u003c\u0026(dyn Error + 'static)\u003e { ... } } (deprecated거나 nightly 전용인 메서드가 있지만 여기서는 다루지 않겠다)\nfn source(\u0026self)는 이 에러가 발생한 원인을 (존재하면) 반환한다. 공식 문서의 설명을 빌리면, source의 주된 사용처는 ‘추상화의 경계’를 넘나들 때(서로 다른 모듈이라던지) 경계 너머의 에러(즉 지금 반환하려는 에러가 감싸는 다른 모듈에서 유래한 에러)를 표시하는 것이다.\nenum/struct Error 필자가 일반적으로 Error 트레이트를 구현하는 방법은 crate 혹은 중요한 기능 단위로서 기능하는 모듈별로 Error 타입을 정의하는 것이다. 각 Error 타입은 그 Error의 근원(source)을 표현해야 하기 때문에 으레 열거형으로 표현하곤 한다.\npub enum Error { CannotParseInteger(ParseIntError), CannotDeserializeJson(serde_json::Error), } 이제 에러를 설명하기 위해 impl Display for Error 를 해 주자.\nimpl Display for Error { fn fmt(\u0026self, f: \u0026mut std::fmt::Formatter\u003c'_\u003e) -\u003e Result\u003c(), std::fmt::Error\u003e { match self { Self::CannotParseInteger(err) =\u003e write!(f, \"cannot parse integer\"), // ... } } } 여기서 조금 더 자세하게 설명해보자면,\n\"cannot parse integer\"와 같이 에러의 섦여 옆에 근원이 되는 에러를 같이 표시하는 경우도 있다. 필자의 의견으로는, 에러를 ‘예쁘게’ 표시해주는 (후술할)anyhow와 같은 크레이트를 사용하면 Error::source의 연쇄를 자동으로 보여주기 때문에 굳이 이렇게 작성할 필요는 없다고 생각한다. Rust API Guidelines에 따르면, 동사-목적어-Error 순으로 에러 타입의 이름을 정하는 것이 권장된다. 이를 차용하여 열거형의 각 variant들에도 동일한 명명 관습을 적용하도록 하였다. 동일하게, Rust API Guidelines에 따르면, 에러 메시지는 다음을 따를 것을 권장한다. 소문자로 시작해야 한다. 끝에 온점을 두면 안 된다. 간결하게 작성하는 것이 좋다. 이 외에도 에러 ‘타입’에 대해 Send/Sync를 구현할 것을 권장한다거나, Error::description(deprecated)를 구현하지 않을 것을 권한다던가 하는 사항들이 있으니 위 문서를 참고할 것을 권한다. 남은 것은 impl std::error::Error for Error다.\nimpl std::error::Error for Error { fn source(\u0026self) -\u003e Option\u003c\u0026(dyn Error + 'static)\u003ek { match self { Self::CannotParseInteger(err) =\u003e Some(\u0026err) // ... } } } (사실 Error::source는 항상 None을 반환하는 default implementation이 존재하지만, 이제 우리는 source를 구현함으로서 이 에러가 어떤 사유로 인해 발생했는지도 추적할 수 있게 된 것이다.)\n필자는 enum Error를 주로 작성하지만, 때에 따라서는 에러 타입을 구조체로 정의하는 것이 더 자연스러울 수도 있다. 근원이 되는 에러가 없거나 impl std::error::Error로 표현하기에는 ‘투 머치’인 경우에는 이런 식의 타입을 구성하고는 한다(대표적으로 std::io::Error가 있다):\nstruct Error { kind: ErrorKind, backtrace: Backtrace, } enum ErrorKind { BadParams, SyncFailure, } 그냥 ErrorKind가 impl std::error::Error를 하면 되지 않느냐고 반문할 수도 있다. 좋은 지적이다. struct로 에러를 만들 때의 장점은 각각의 경우에 대해 backtrace 같은 공통 속성을 각 varaint마다 일일히 추가할 필요가 없다는 것이다. Rust의 타입 시스템은 열거형과 구조체를 딱히 차별하지 않기 때문에 본인이 원하는 대로 조합해서 쓰는 것이 제일 좋을 것이다.\nthiserror 고백하자면, 위에서 거짓말을 하나 했다. 나는 이런 노가다를 Rust 코딩하면서 단 한 번도 해 본적이 없다(정확히는 방금 글 쓰면서 처음 해 봤다). 왜냐면 이 일을 자동으로 해주는 thiserror라는 크레이트가 존재하기 때문이다.\n우리의 노가다는 이제 몇 줄의 proc-macro로 대체된다:\nuse thiserror::Error; #[derive(Error, Debug)] enum Error { #[error(\"cannot parse integer\")] CannotParseInteger(#[source] ParseIntError), #[error(\"cannot deserialize JSON\")] CannotDeserializeJson(#[source] serde_json::Error), } thiserror는 다른 편의 기능들도 제공한다. 첫째로, ?(try) 연산자를 더 편하게 사용하기 위해, #[from]을 필드에 붙여서 impl From for Error를 자동으로 구현할 수 있게 도와준다. 이것이 없어도 map_err를 쓰면 손쉽게 (명시적인) 변환이 가능하기 때문에, 꼭 붙여야 할 필요는 없다.\n// 위 예시를 그대로 사용했다면 let num: i32 = some_string.parse().map_err(Error::CannotParseInteger)?; // 위 예시에서 #[source] 자리에 #[from]을 붙였다면 let num: i32 = some_string.parse()?; 참고로 #[from]은 #[source]를 암시하기 때문에 둘을 동시에 사용할 일은 없다.\n필자의 개인적인 의견으로 #[from]은 주의해서 사용해야 하는데, 첫 번째 이유로는 From을 구현하게 되면 반환할 수 있는 배리언트가 하나로 고정되어 버린다는 문제가 있기 때문이다.(위 예시에서 CannotSerializeJson(serde_json::Error)가 추가된다면 From는 어떻게 구현되어야 할까?)\n튜플 열거형이 아닌 구조체 형식의 열거형이나 구조체를 사용할 경우에는, source 라는 이름의 필드를 추가하는 것으로 #[source]의 효과를 자동으로 누릴 수 있으니 참고하기 바란다.\n단순히 여러 타입의 에러를 감싸기만 하는 용도(즉 source나 Display 구현을 따로 감싸고 싶지 않은 경우)에는 #[transparent]를 사용할 수 있다.\n#[derive(Error, Debug)] pub enum MyError { ... #[error(transparent)] Other(#[from] anyhow::Error), // source and Display delegate to anyhow::Error } (thiserror의 문서에서 발췌)\nBox",
+  "wordCount" : "2376",
+  "inLanguage": "en",
+  "datePublished": "2023-01-26T20:58:44+09:00",
+  "dateModified": "2023-01-26T20:58:44+09:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Option::None",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://blog.cro.sh/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://blog.cro.sh/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Rust의 에러 처리, Part 2
+    </h1>
+    <div class="post-meta"><span title='2023-01-26 20:58:44 +0900 KST'>January 26, 2023</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p><a href="../error-handling-story-in-rust-part-1">[Rust의 에러 처리, Part 1]</a>에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.</p>
+<h1 id="trait-error"><code>trait Error</code><a hidden class="anchor" aria-hidden="true" href="#trait-error">#</a></h1>
+<p>Rust 에러 처리의 두 번째 중추는 <code>Error</code> 트레잇이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> Error: <span style="color:#a6e22e">Debug</span> <span style="color:#f92672">+</span> Display {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">source</span>(<span style="color:#f92672">&amp;</span>self) -&gt; Option<span style="color:#f92672">&lt;&amp;</span>(<span style="color:#66d9ef">dyn</span> Error <span style="color:#f92672">+</span> <span style="color:#f92672">&#39;</span>static)<span style="color:#f92672">&gt;</span> { <span style="color:#f92672">..</span>. }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>(deprecated거나 nightly 전용인 메서드가 있지만 여기서는 다루지 않겠다)</p>
+<p><code>fn source(&amp;self)</code>는 이 에러가 발생한 원인을 (존재하면) 반환한다. 공식 문서의 설명을 빌리면, <code>source</code>의 주된 사용처는 &lsquo;추상화의 경계&rsquo;를 넘나들 때(서로 다른 모듈이라던지) 경계 너머의 에러(즉 지금 반환하려는 에러가 감싸는 다른 모듈에서 유래한 에러)를 표시하는 것이다.</p>
+<h1 id="enumstruct-error"><code>enum/struct Error</code><a hidden class="anchor" aria-hidden="true" href="#enumstruct-error">#</a></h1>
+<p>필자가 일반적으로 <code>Error</code> 트레이트를 구현하는 방법은 crate 혹은 중요한 기능 단위로서 기능하는 모듈별로 <code>Error</code> 타입을 정의하는 것이다. 각 <code>Error</code> 타입은 그 <code>Error</code>의 근원(<code>source</code>)을 표현해야 하기 때문에 으레 열거형으로 표현하곤 한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Error</span> {
+</span></span><span style="display:flex;"><span>    CannotParseInteger(ParseIntError),
+</span></span><span style="display:flex;"><span>    CannotDeserializeJson(serde_json::Error),
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>이제 에러를 설명하기 위해 <code>impl Display for Error</code> 를 해 주자.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> Display <span style="color:#66d9ef">for</span> Error {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">fmt</span>(<span style="color:#f92672">&amp;</span>self, f: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">mut</span> std::fmt::Formatter<span style="color:#f92672">&lt;&#39;</span>_<span style="color:#f92672">&gt;</span>) -&gt; Result<span style="color:#f92672">&lt;</span>(), std::fmt::Error<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">match</span> self {
+</span></span><span style="display:flex;"><span>            Self::CannotParseInteger(err) <span style="color:#f92672">=&gt;</span> write!(f, <span style="color:#e6db74">&#34;cannot parse integer&#34;</span>),
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>여기서 조금 더 자세하게 설명해보자면,</p>
+<ul>
+<li><code>&quot;cannot parse integer&quot;</code>와 같이 에러의 섦여 옆에 근원이 되는 에러를 같이 표시하는 경우도 있다. 필자의 의견으로는, 에러를 &lsquo;예쁘게&rsquo; 표시해주는 (후술할)<code>anyhow</code>와 같은 크레이트를 사용하면 <code>Error::source</code>의 연쇄를 자동으로 보여주기 때문에 굳이 이렇게 작성할 필요는 없다고 생각한다.</li>
+<li><a href="https://rust-lang.github.io/api-guidelines/naming.html#names-use-a-consistent-word-order-c-word-order">Rust API Guidelines</a>에 따르면, 동사-목적어-Error 순으로 에러 타입의 이름을 정하는 것이 권장된다. 이를 차용하여 열거형의 각 variant들에도 동일한 명명 관습을 적용하도록 하였다.</li>
+<li>동일하게, <a href="https://rust-lang.github.io/api-guidelines/interoperability.html?highlight=message#error-types-are-meaningful-and-well-behaved-c-good-err">Rust API Guidelines</a>에 따르면, 에러 메시지는 다음을 따를 것을 권장한다.
+<ul>
+<li>소문자로 시작해야 한다.</li>
+<li>끝에 온점을 두면 안 된다.</li>
+<li>간결하게 작성하는 것이 좋다.</li>
+</ul>
+</li>
+<li>이 외에도 에러 &lsquo;타입&rsquo;에 대해 Send/Sync를 구현할 것을 권장한다거나, <code>Error::description</code>(deprecated)를 구현하지 않을 것을 권한다던가 하는 사항들이 있으니 위 문서를 참고할 것을 권한다.</li>
+</ul>
+<p>남은 것은 <code>impl std::error::Error for Error</code>다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> std::error::Error <span style="color:#66d9ef">for</span> Error {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">source</span>(<span style="color:#f92672">&amp;</span>self) -&gt; Option<span style="color:#f92672">&lt;&amp;</span>(<span style="color:#66d9ef">dyn</span> Error <span style="color:#f92672">+</span> <span style="color:#f92672">&#39;</span>static)<span style="color:#f92672">&gt;</span>k {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">match</span> self {
+</span></span><span style="display:flex;"><span>            Self::CannotParseInteger(err) <span style="color:#f92672">=&gt;</span> Some(<span style="color:#f92672">&amp;</span>err)
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>(사실 <code>Error::source</code>는 항상 <code>None</code>을 반환하는 default implementation이 존재하지만, 이제 우리는 <code>source</code>를 구현함으로서 이 에러가 어떤 사유로 인해 발생했는지도 추적할 수 있게 된 것이다.)</p>
+<p>필자는 <code>enum Error</code>를 주로 작성하지만, 때에 따라서는 에러 타입을 구조체로 정의하는 것이 더 자연스러울 수도 있다. 근원이 되는 에러가 없거나 <code>impl std::error::Error</code>로 표현하기에는 &lsquo;투 머치&rsquo;인 경우에는 이런 식의 타입을 구성하고는 한다(대표적으로 <a href="https://doc.rust-lang.org/stable/std/io/struct.Error.html"><code>std::io::Error</code></a>가 있다):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Error</span> {
+</span></span><span style="display:flex;"><span>    kind: <span style="color:#a6e22e">ErrorKind</span>,
+</span></span><span style="display:flex;"><span>    backtrace: <span style="color:#a6e22e">Backtrace</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">ErrorKind</span> {
+</span></span><span style="display:flex;"><span>    BadParams,
+</span></span><span style="display:flex;"><span>    SyncFailure,
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>그냥 <code>ErrorKind</code>가 <code>impl std::error::Error</code>를 하면 되지 않느냐고 반문할 수도 있다. 좋은 지적이다. <code>struct</code>로 에러를 만들 때의 장점은 각각의 경우에 대해 <code>backtrace</code> 같은 공통 속성을 각 varaint마다 일일히 추가할 필요가 없다는 것이다.
+Rust의 타입 시스템은 열거형과 구조체를 딱히 차별하지 않기 때문에 본인이 원하는 대로 조합해서 쓰는 것이 제일 좋을 것이다.</p>
+<h1 id="thiserror"><code>thiserror</code><a hidden class="anchor" aria-hidden="true" href="#thiserror">#</a></h1>
+<p>고백하자면, 위에서 거짓말을 하나 했다. 나는 이런 노가다를 Rust 코딩하면서 단 한 번도 해 본적이 없다(정확히는 방금 글 쓰면서 처음 해 봤다). 왜냐면 이 일을 자동으로 해주는 <a href="https://docs.rs/thiserror"><code>thiserror</code></a>라는 크레이트가 존재하기 때문이다.</p>
+<p>우리의 노가다는 이제 몇 줄의 proc-macro로 대체된다:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> thiserror::Error;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Error, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Error</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#[error(</span><span style="color:#e6db74">&#34;cannot parse integer&#34;</span><span style="color:#75715e">)]</span>
+</span></span><span style="display:flex;"><span>    CannotParseInteger(<span style="color:#75715e">#[source]</span> ParseIntError),
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#[error(</span><span style="color:#e6db74">&#34;cannot deserialize JSON&#34;</span><span style="color:#75715e">)]</span>
+</span></span><span style="display:flex;"><span>    CannotDeserializeJson(<span style="color:#75715e">#[source]</span> serde_json::Error),
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p><code>thiserror</code>는 다른 편의 기능들도 제공한다. 첫째로, <code>?</code>(try) 연산자를 더 편하게 사용하기 위해, <code>#[from]</code>을 필드에 붙여서 <code>impl From&lt;TheFieldType&gt; for Error</code>를 자동으로 구현할 수 있게 도와준다. 이것이 없어도 <code>map_err</code>를 쓰면 손쉽게 (명시적인) 변환이 가능하기 때문에, 꼭 붙여야 할 필요는 없다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// 위 예시를 그대로 사용했다면
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">let</span> num: <span style="color:#66d9ef">i32</span> <span style="color:#f92672">=</span> some_string.parse().map_err(Error::CannotParseInteger)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 위 예시에서 #[source] 자리에 #[from]을 붙였다면
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">let</span> num: <span style="color:#66d9ef">i32</span> <span style="color:#f92672">=</span> some_string.parse()<span style="color:#f92672">?</span>;
+</span></span></code></pre></div><p>참고로 <code>#[from]</code>은 <code>#[source]</code>를 암시하기 때문에 둘을 동시에 사용할 일은 없다.</p>
+<p>필자의 개인적인 의견으로 <code>#[from]</code>은 주의해서 사용해야 하는데, 첫 번째 이유로는 <code>From&lt;InnerError&gt;</code>을 구현하게 되면 반환할 수 있는 배리언트가 하나로 고정되어 버린다는 문제가 있기 때문이다.(위 예시에서 <code>CannotSerializeJson(serde_json::Error)</code>가 추가된다면 <code>From&lt;serde_json::Error&gt;</code>는 어떻게 구현되어야 할까?)</p>
+<p>튜플 열거형이 아닌 구조체 형식의 열거형이나 구조체를 사용할 경우에는, <code>source</code> 라는 이름의 필드를 추가하는 것으로 <code>#[source]</code>의 효과를 자동으로 누릴 수 있으니 참고하기 바란다.</p>
+<p>단순히 여러 타입의 에러를 감싸기만 하는 용도(즉 <code>source</code>나 <code>Display</code> 구현을 따로 감싸고 싶지 않은 경우)에는 <code>#[transparent]</code>를 사용할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">#[derive(Error, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">MyError</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">..</span>.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">#[error(transparent)]</span>
+</span></span><span style="display:flex;"><span>    Other(<span style="color:#75715e">#[from]</span> anyhow::Error),  <span style="color:#75715e">// source and Display delegate to anyhow::Error
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></code></pre></div><p>(<code>thiserror</code>의 문서에서 발췌)</p>
+<h1 id="boxdyn-error--static"><code>Box&lt;dyn Error + 'static&gt;</code><a hidden class="anchor" aria-hidden="true" href="#boxdyn-error--static">#</a></h1>
+<p>모듈의 경우에는 코드를 작성하는 시점에 발생할 오류를 모두 알고 있지만, 그 경우의 수가 너무 방대하거나 컴파일 시점에 알기 어려운 경우에는 위처럼 열거형으로 오류의 가짓수를 표현하는 것이 어려울 것이다. 이 때는 트레잇 객체를 사용해보자.</p>
+<p><code>dyn Error (+ Send) (+ Sync) + 'static</code>은 에러 타입의 다운캐스팅(언박싱?)을 지원한다:</p>
+<ul>
+<li><code>fn downcast&lt;T&gt;(Box&lt;dyn Error + 'static&gt;) -&gt; Result&lt;Box&lt;T&gt;, Box&lt;dyn Error + 'static&gt;&gt;</code></li>
+<li><code>fn downcast_ref&lt;T&gt;(&amp;self) -&gt; Option&lt;&amp;T&gt;</code></li>
+<li><code>fn downcast_mut&lt;T&gt;(&amp;mut self) -&gt; Option&lt;&amp;mut T&gt;</code></li>
+</ul>
+<p>(기대한 타입 <code>T</code>와 실제 타입이 맞지 않으면 <code>Err</code>나 <code>None</code>을 반환하니, 아마 원하는 타입들에 대해 <code>match</code> 또는 if let Some(err) = &hellip; {} `을 연쇄적으로 사용하게 될 것이다)</p>
+<p>이는 런타임에 여러 종류의 에러를 한 타입으로 합치고 다시 분리하는 것을 가능케 한다.</p>
+<h1 id="anyhow--eyre"><code>anyhow</code> &amp; <code>eyre</code><a hidden class="anchor" aria-hidden="true" href="#anyhow--eyre">#</a></h1>
+<p><code>thiserror</code>가 정적인 <code>enum Error</code>의 편리한 버전이라면, <code>anyhow</code>는 동적인 <code>Box&lt;dyn Error + 'static&gt;</code>의 편리한 버전이다.</p>
+<p><code>Box&lt;dyn Error + 'static&gt;</code> 대신에, <code>anyhow</code>는 <code>anyhow::Error</code>를 제공한다. <code>Box&lt;dyn Error + 'static&gt;</code>의 기능들(다운캐스팅 등)을 지원하면서 그보다 편리한 점이 몇 개 있는데,</p>
+<ul>
+<li><code>anyhow::Error</code>는 임의의 <code>std::error::Error + Send + Sync + 'static</code>으로부터 변환 가능하기에(<code>From</code> 트레잇), <code>Result&lt;_, anyhow::Error&gt;</code>를 반환하는 함수 안에서 사용하는 <code>?</code> 연산자는 추가적인 <code>.map_err</code>가 필요 없다(엄밀히 말해서는 해당 에러가 <code>std::error::Error</code>를 구현하지 않는 경우도 있으나 드문 경우이므로 논외로 치자).</li>
+<li><code>anyhow::Error::context</code>는 <code>anyhow::Error</code>에 추가적인 에러 발생의 맥락을 저장할 수 있게 한다. 모든 상황에 대해서 에러 타입을 만들기보다는 공통된 상황으로 카테고리를 묶고(열거형 등으로) 해당 에러가 발생하는 지점마다 맥락을 제공하면 더 효율적인 에러 처리가 가능해진다.
+(이렇게 추가된 맥락은 <code>anyhow::Error</code>의 <code>Debug</code> 표현에서 확인하거나 다운캐스팅을 통해 꺼내올 수 있다.)</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">#[derive(Error, Debug)]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Error</span> {
+</span></span><span style="display:flex;"><span>    CannotSendData(std::io::Error),
+</span></span><span style="display:flex;"><span>    CannotReceiveData(std::io::Error),
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// send()와 recv()는 Result&lt;_, std::io::Error&gt;를 반환
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">do</span>() -&gt; <span style="color:#a6e22e">anyhow</span>::Result<span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    send().map_err(Error::CannotSendData)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> r <span style="color:#f92672">=</span> recv().map_err(Error::CannotReceiveData)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#75715e">// send()와 recv()는 Result&lt;_, std::io::Error&gt;를 반환
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 참고: anyhow::Result&lt;T, E = Error&gt; = Result&lt;T, E&gt;;
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// 참고: 사실 anyhow::Error::context가 아니라 Context 트레잇의 .context() 메서드를 쓰고 있다.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">do</span>() -&gt; <span style="color:#a6e22e">anyhow</span>::Result<span style="color:#f92672">&lt;</span>()<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    send().context(<span style="color:#e6db74">&#34;cannot send data&#34;</span>)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> r <span style="color:#f92672">=</span> recv().context(<span style="color:#e6db74">&#34;cannot receive data&#34;</span>)<span style="color:#f92672">?</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>(물론 이렇게 맥락에 문자열을 넣으면 나중에 맥락을 꺼내 처리할 때 문자열 비교를 동반하기 때문에, 에러 처리를 상황별로 적절하게 해야 하는 경우에는 열거형을 넣거나 하는 것이 좋을 것으로 생각된다.)</p>
+<p>이 외에도 <code>anyhow</code>는 몇 가지 편리한 기능을 추가적으로 제공한다:</p>
+<ul>
+<li><code>anyhow!</code> 매크로: 서식 문자열과 파라미터가 주어지면, <code>format!</code>과 비슷하지만 문자열 대신 해당 문자열을 내용으로 가지는 에러를 생성한다. <code>Debug + Display</code>(혹은 더 나아가 <code>Error</code>)를 구현하는 단일 값을 제공할 수도 있다.</li>
+<li><code>bail!</code> 매크로: <code>anyhow!</code> 매크로와 같지만 생성된 에러를 즉시 반환한다. <code>panic!</code>의 에러 핸들링 버전으로 보아도 무방하다.</li>
+<li><code>ensure!</code> 매크로: <code>bail!</code> 매크로가 <code>panic!</code>에 대응된다면, 이 매크로는 <code>assert!</code>에 대응된다. 첫 번째 파라미터로 주어진 조건문이 false면 <code>bail!</code>한다.</li>
+</ul>
+<p><code>eyre</code> 크레이트는 <code>anyhow</code>의 포크로, <code>log</code>나 <code>tracing</code>과 비슷하게 에러의 생성/표시 방식을 사용자가 커스텀할 수 있게 한다. 대표적인 에러 표시 방식 지정 크레이트인 <code>color-eyre</code>에 대해 알아보자.</p>
+<h2 id="color-eyre"><code>color-eyre</code><a hidden class="anchor" aria-hidden="true" href="#color-eyre">#</a></h2>
+<p>eyre 크레이트에 주로 붙이는 크레이트인 <code>color-eyre</code>는 <code>eyre::Report</code>(<code>anyhow::Error</code>에 대응)를 아주 멋드러지게 표현해준다.</p>
+<pre tabindex="0"><code class="language-no_highlight" data-lang="no_highlight">❯ cargo run --example custom_section
+    Finished dev [unoptimized + debuginfo] target(s) in 0.04s
+     Running `target/debug/examples/custom_section`
+Error:
+   0: Unable to read config
+   1: cmd exited with non-zero status code
+
+Stderr:
+   cat: fake_file: No such file or directory
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   0: custom_section::output2 with self=&#34;cat&#34; &#34;fake_file&#34;
+      at examples/custom_section.rs:14
+   1: custom_section::read_file with path=&#34;fake_file&#34;
+      at examples/custom_section.rs:58
+   2: custom_section::read_config
+      at examples/custom_section.rs:63
+
+Suggestion: try using a file that exists next time
+</code></pre><p>이 외에도 <code>color-eyre</code>는 다음의 편의 기능들을 가진다:</p>
+<ul>
+<li>
+<p><code>backtrace-rs</code> 지원: Stable Rust에서도 backtrace를 사용할 수 있게 한다.</p>
+<p><code>backtrace-rs</code>는 외부 크레이트이므로 표준 라이브러리와 다르게 최적화가 되지 않아, 디버그 빌드에서는 성능 손해가 커질 수 있다. <code>color-eyre</code>의 문서에 따르면, 아래의 프로필을 Cargo.toml에 붙이는 것이 권장된다:</p>
+</li>
+</ul>
+<pre tabindex="0"><code class="language-no_highlight" data-lang="no_highlight">[profile.dev.package.backtrace]
+opt-level = 3
+</code></pre><ul>
+<li>커스텀 섹션: <code>.section()</code> 메서드를 사용해서 에러에 원하는 섹션을 추가하거나(일종의 디버그 출력 용도의 <code>anyhow::Context</code>라고 보면 되겠다), <code>.suggestion()</code> 메서드로 권장 사항을 표시할 수도 있다.</li>
+<li>Spantrace 출력: <code>tracing</code>을 사용중이라면 지금 실행 맥락에서의 span을 거슬러 올라가 어떤 연유로 이 코드 지점까지 도달했는지를 알 수 있게 된다. Spantrace는 backtrace와 다르게 함수 파라미터 등도 같이 저장할 수 있고, backtrace보다 더 캡쳐에 드는 리소스 소모가 적다.</li>
+<li>더 화려한 에러 출력: <code>RUST_LIB_BACKTRACE</code> 환경 변수를 <code>full</code>로 주면, 소스코드의 줄 번호와 주변의 소스코드 내용을(읽을 수 있다면) 표시해준다:</li>
+</ul>
+<pre tabindex="0"><code class="language-no_highlight" data-lang="no_highlight">❯ RUST_LIB_BACKTRACE=full cargo run --example usage
+    Finished dev [unoptimized + debuginfo] target(s) in 0.05s
+     Running `target/debug/examples/usage`
+Jul 05 19:16:06.335  INFO read_config:read_file{path=&#34;fake_file&#34;}: Reading file
+Error:
+   0: Unable to read config
+   1: No such file or directory (os error 2)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SPANTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   0: usage::read_file with path=&#34;fake_file&#34;
+      at examples/usage.rs:32
+        30 │ }
+        31 │
+        32 &gt; #[instrument]
+        33 │ fn read_file(path: &amp;str) -&gt; Result&lt;(), Report&gt; {
+        34 │     info!(&#34;Reading file&#34;);
+   1: usage::read_config
+      at examples/usage.rs:38
+        36 │ }
+        37 │
+        38 &gt; #[instrument]
+        39 │ fn read_config() -&gt; Result&lt;(), Report&gt; {
+        40 │     read_file(&#34;fake_file&#34;)
+
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BACKTRACE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                                ⋮ 5 frames hidden ⋮                               
+   6: usage::read_file::haee210cb22460af3
+      at /home/jlusby/git/yaahc/color-eyre/examples/usage.rs:35
+        33 │ fn read_file(path: &amp;str) -&gt; Result&lt;(), Report&gt; {
+        34 │     info!(&#34;Reading file&#34;);
+        35 &gt;     Ok(std::fs::read_to_string(path).map(drop)?)
+        36 │ }
+        37 │
+   7: usage::read_config::ha649ef4ec333524d
+      at /home/jlusby/git/yaahc/color-eyre/examples/usage.rs:40
+        38 │ #[instrument]
+        39 │ fn read_config() -&gt; Result&lt;(), Report&gt; {
+        40 &gt;     read_file(&#34;fake_file&#34;)
+        41 │         .wrap_err(&#34;Unable to read config&#34;)
+        42 │         .suggestion(&#34;try using a file that exists next time&#34;)
+   8: usage::main::hbe443b50eac38236
+      at /home/jlusby/git/yaahc/color-eyre/examples/usage.rs:11
+         9 │     color_eyre::install()?;
+        10 │
+        11 &gt;     Ok(read_config()?)
+        12 │ }
+        13 │
+                                ⋮ 10 frames hidden ⋮                              
+
+Suggestion: try using a file that exists next time
+</code></pre><p>멋지지 않은가?</p>
+<h1 id="thiserror-vs-anyhoweyre"><code>thiserror</code> vs <code>anyhow</code>/<code>eyre</code><a hidden class="anchor" aria-hidden="true" href="#thiserror-vs-anyhoweyre">#</a></h1>
+<p>두 에러 처리 &lsquo;방식&rsquo; (혹은 &lsquo;철학?&rsquo;)의 가장 큰 차이점은, <code>thiserror</code>의 경우 열거형이나 구조체를 통해 정의하므로 에러의 종류나 내용이 타입으로서 드러나는 데에 비해, <code>anyhow</code>의 경우 박싱을 통해 에러가 어떻게 &lsquo;생겨먹었는지&rsquo;를 숨긴다는 것이다. 실제로 <code>anyhow::Error</code>가 담고 있는 타입을 꺼내오려면 자신이 생각하는 타입으로 다운캐스트해보는 수 밖에 없다.</p>
+<p>그래서, <code>anyhow</code>의 <a href="https://github.com/dtolnay/anyhow/blob/0a45d7665c32ba61788e09273bb17912ed402332/README.md?plain=1#L158-L165">레포지토리 README</a>를 보면, 라이브러리의 경우는 <code>thiserror</code>를 권장하고(라이브러리 사용자가 에러의 내용을 보고 각각 다른 로직으로 처리할 여지를 줄 수 있도록), 라이브러리들을 마지막에 사용하는 &rsquo;end-user&rsquo; 크레이트(뭉뚱그려 말해 main.rs가 있는 크레이트)의 경우 <code>anyhow</code>(혹은 <code>eyre</code>)를 사용할 것을 권장하고 있다.</p>
+<hr>
+<p>부록 느낌으로, 1부에서 너무 간략하게 다루고 넘어가버린 <code>panic!</code>에 대해 조금만 더 설명해 보고자 한다.</p>
+<h1 id="panic--catch_unwind"><code>panic!</code> &amp; <code>catch_unwind</code><a hidden class="anchor" aria-hidden="true" href="#panic--catch_unwind">#</a></h1>
+<p><code>panic!</code>이 예외를 던지는, 다른 언어의 <code>throw</code>나 <code>raise</code>에 대응된다면, <code>try-catch</code>에 대응되는 것이 바로 <code>std::panic::catch_unwind</code>다. <a href="../error-handling-story-in-rust-part-1/#to-panic-or-not-to-panic">이전 글에서 언급했듯</a>, panic-catch를 다른 언어의 try-catch와 같이 사용하는 것은 기피해야 하지만, catch_unwind가 필요한 경우도 존재하기는 한다.</p>
+<p>&lsquo;길게 실행되어야 하는&rsquo; 메인 로직이 존재하여 매 요청마다 서브 로직을 수행하는 패턴을 사용하는 경우, 서브 로직이 실패하여 panic이 발생하면 메인 로직도 같이 panic에 휘말려 프로세스 전체가 종료될 것이다. 이를 방지하기 위해 메인 로직이 서브 로직을 실행할 때 <code>catch_unwind</code>로 감싸서 패닉을 처리 수 있다. 다시 말해, panic은 주로 처리할 수 없는 에러를 만났을 때 발생하므로 catch_unwind를 통해 복구할 수 있는 여지는 없지만, 서브 로직의 실패가 메인 로직의 실패로 이어지지 않도록 격리한다는 의미이다. 이러한 패턴은 주로 웹 서버 등에서 발견되고는 한다.</p>
+<ul>
+<li>이와 별개로, Rust의 panic 매커니즘은 panic이 발생하지 않는(정확히는 unwind하지 않는) 상황에 극도로 최적화되어 있기 때문에, 다른 언어의 exception에 비해 그 비용이 비싸다. 이는 panic-catch를 주된 에러 처리 매커니즘으로 사용하면 안 되는 이유 중에 하나이기도 하다.</li>
+</ul>
+<blockquote>
+<p>Rust&rsquo;s current unwinding implementation is heavily optimized for the &ldquo;doesn&rsquo;t unwind&rdquo; case. <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+</blockquote>
+<h1 id="stdpanicset_hook"><code>std::panic::set_hook</code><a hidden class="anchor" aria-hidden="true" href="#stdpanicset_hook">#</a></h1>
+<p>&lsquo;panic hook&rsquo;을 설정한다. panic hook은 패닉을 만났을 때 실행되는 함수인데, 기본적으로는 패닉 메시지를 stderr에 표시하고 (<code>RUST_BACKTRACE</code> 환경 변수가 설정된 경우) backtrace도 함께 표시해주는 hook이 설치되어 있다. 만약 자신이 (<a href="https://sentry.io">Sentry</a>와 같이) 에러 추적 서비스를 만들고 있거나 할 때 사용할 일이 있을 것이다.</p>
+<h1 id="unwind-safety">Unwind Safety<a hidden class="anchor" aria-hidden="true" href="#unwind-safety">#</a></h1>
+<p>기본 설정 하에서는, panic이 발생하면 해당 프로그램은 (<code>catch_unwind</code>를 만날 때까지) 콜 스택을 거슬러 올라가면서 실행 중인 맥락을 끊고 &lsquo;탈출&rsquo;(즉시 반환)하는데, 이를 unwinding이라 한다. 이는 일부 경우에 예상하지 못한 결과를 낳을 수 있는데, 이러한 코드를 생각해 보자.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// Invariant: both hands are `Some`
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Juggler</span><span style="color:#f92672">&lt;</span>Func: FnMut()<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    left_hand: Option<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">i32</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    right_hand: Option<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">i32</span><span style="color:#f92672">&gt;</span>,
+</span></span><span style="display:flex;"><span>    func: <span style="color:#a6e22e">Func</span>,
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>Func: FnMut()<span style="color:#f92672">&gt;</span> Juggler<span style="color:#f92672">&lt;</span>Func<span style="color:#f92672">&gt;</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">juggle</span>(<span style="color:#f92672">&amp;</span><span style="color:#66d9ef">mut</span> self) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">let</span> tmp <span style="color:#f92672">=</span> self.left_hand.take();
+</span></span><span style="display:flex;"><span>        (self.func)();
+</span></span><span style="display:flex;"><span>        self.left_hand <span style="color:#f92672">=</span> self.right_hand;
+</span></span><span style="display:flex;"><span>        self.right_hand <span style="color:#f92672">=</span> tmp;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">print</span>(<span style="color:#f92672">&amp;</span>self) {
+</span></span><span style="display:flex;"><span>        println!(<span style="color:#e6db74">&#34;left: {:?}, right: {:?}&#34;</span>, self.left_hand, self.right_hand);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> cnt <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> juggler <span style="color:#f92672">=</span> Juggler {
+</span></span><span style="display:flex;"><span>        left_hand: Some(<span style="color:#ae81ff">3</span>),
+</span></span><span style="display:flex;"><span>        right_hand: Some(<span style="color:#ae81ff">1</span>),
+</span></span><span style="display:flex;"><span>        func: <span style="color:#f92672">||</span> {
+</span></span><span style="display:flex;"><span>            cnt <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> cnt <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">3</span> {
+</span></span><span style="display:flex;"><span>                panic!(<span style="color:#e6db74">&#34;tired&#34;</span>);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#ae81ff">5</span> {
+</span></span><span style="display:flex;"><span>        juggler.print();
+</span></span><span style="display:flex;"><span>        juggler.juggle();
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>(<code>std::mem::replace</code>를 쓰면 되지만 일단 무시하자)</p>
+<p><code>.juggle()</code> 메서드는 양손에 든 것을 뒤바꾸는데, 왼손의 것을 공중에 올린 뒤에 무언가(<code>self.func</code>)를 하고 오른손에 안착시킨다. 그런데 저글러가 만약 공중에 무언가를 올린 채로 panic을 내 버리면 어떻게 될까? 공중에 올려진 값은 지역 변수이므로 즉시 반환하면서 소실될 것이다. 프로그램 전체가 즉시 종료된다면 소실 여부가 중요하지 않지만, catch_unwind를 사용한다면&hellip;</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#ae81ff">5</span> {
+</span></span><span style="display:flex;"><span>        juggler.print();
+</span></span><span style="display:flex;"><span>        catch_unwind(<span style="color:#f92672">||</span> juggler.juggle());
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><pre tabindex="0"><code class="language-no_highlight" data-lang="no_highlight">error[E0277]: the type `&amp;mut Juggler&lt;[closure@src/main.rs:27:15: 27:17]&gt;` may not be safely transferred across an unwind boundary
+  --&gt; src/main.rs:37:22
+   |
+37 |         catch_unwind(|| juggler.juggle());
+   |         ------------ --^^^^^^^^^^^^^^^^^
+   |         |            |
+   |         |            `&amp;mut Juggler&lt;[closure@src/main.rs:27:15: 27:17]&gt;` may not be safely transferred across an unwind boundary
+   |         |            within this `[closure@src/main.rs:37:22: 37:24]`
+   |         required by a bound introduced by this call
+   |
+   = help: within `[closure@src/main.rs:37:22: 37:24]`, the trait `UnwindSafe` is not implemented for `&amp;mut Juggler&lt;[closure@src/main.rs:27:15: 27:17]&gt;`
+   = note: `UnwindSafe` is implemented for `&amp;Juggler&lt;[closure@src/main.rs:27:15: 27:17]&gt;`, but not for `&amp;mut Juggler&lt;[closure@src/main.rs:27:15: 27:17]&gt;`
+note: required because it&#39;s used within this closure
+  --&gt; src/main.rs:37:22
+   |
+37 |         catch_unwind(|| juggler.juggle());
+   |                      ^^
+note: required by a bound in `catch_unwind`
+  --&gt; /rustc/fc594f15669680fa70d255faec3ca3fb507c3405/library/std/src/panic.rs:136:40
+   |
+   = note: required by this bound in `catch_unwind`
+</code></pre><p>컴파일이 되지 않는다! 이는 기본적으로 <code>juggler.juggle()</code>을 수행하던 중 panic이 발생하면, 우리는 앞서 말했듯이 &lsquo;망한&rsquo;(양손 중 하나가 <code>None</code>인) Juggler를 갖게 되기 때문이다. <code>catch_unwind</code>를 쓰면 이 &lsquo;망해버린&rsquo; 상태를 관측할 수 있고 이는 로직 버그로 이어지기 때문에 타입 시스템을 이용해 <strong><code>catch_unwind</code>에 들어가는 값은 <code>UnwindSafe</code>를 구현해야 한다</strong>는 제약을 걸게 된다. 다시 말해, <code>&amp;mut Juggler</code>를 담고(정확히는 캡쳐하고) 있는 클로저 <code>|| juggler.juggle()</code>은 unwind safe하지 않다.</p>
+<p>강제로 <code>|| juggler.juggle()</code> 클로저를 unwind safe하다고 컴파일러에게 명시하고 싶으면 <code>AssertUnwindSafe</code>로 감싸면 된다:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> _ <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#ae81ff">5</span> {
+</span></span><span style="display:flex;"><span>        juggler.print();
+</span></span><span style="display:flex;"><span>        catch_unwind(AssertUnwindSafe(<span style="color:#f92672">||</span> juggler.juggle()));
+</span></span><span style="display:flex;"><span>    }
+</span></span></code></pre></div><pre tabindex="0"><code class="language-no_highlight" data-lang="no_highlight">Standard Error
+
+   Compiling playground v0.0.1 (/playground)
+warning: unused `Result` that must be used
+  --&gt; src/main.rs:38:9
+   |
+38 |         catch_unwind(AssertUnwindSafe(|| juggler.juggle()));
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this `Result` may be an `Err` variant, which should be handled
+   = note: `#[warn(unused_must_use)]` on by default
+
+warning: `playground` (bin &#34;playground&#34;) generated 1 warning
+    Finished dev [unoptimized + debuginfo] target(s) in 0.64s
+     Running `target/debug/playground`
+thread &#39;main&#39; panicked at &#39;tired&#39;, src/main.rs:31:17
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+thread &#39;main&#39; panicked at &#39;tired&#39;, src/main.rs:31:17
+
+Standard Output
+
+left: Some(3), right: Some(1)
+left: Some(1), right: Some(3)
+left: Some(3), right: Some(1)
+left: Some(1), right: Some(3)
+left: None, right: Some(3)
+</code></pre><p>대신에 이제 우리는 저글러가 한쪽 값을 잃어버린, &lsquo;망한&rsquo; 상태를 관측할 수 있게 된다. Safe Rust에서는 이것이 undefined behavior로 이어지지는 않고 로직 버그나 panic으로 이어질 것이다. 그러나 unsafe 코드라면 이야기가 달라지는데, 만약 위 예시에서 저글러의 손에 있는 값을 꺼내올 때 <code>unwrap_unchecked</code>를 사용했다면 Safe Rust만으로(<code>catch_unwind</code>도 safe한 함수이다) undefined behavior를 유발하는 soundness hole을 만든 셈이 되므로 unsafe Rust에서는 이러한 panic의 발생 가능 지점과 unwind safety에 대해서도 특별히 주의를 기울여야 함을 알 수 있다.</p>
+<h1 id="panic--abort"><code>panic = &quot;abort&quot;</code><a hidden class="anchor" aria-hidden="true" href="#panic--abort">#</a></h1>
+<p>Unwinding이 불가능한 플랫폼이거나, unwinding을 구현하기 위해 수반되는 코드가 바이너리에 들어가는 것이 싫은 경우 Cargo.toml의 프로필에 <code>panic = &quot;abort&quot;</code>를 설정할 수 있다. 이 경우에는 위에서 설명한 unwinding 관련 매커니즘이 전혀 동작하지 않고, panic을 만나면 그 지점에서 즉시 프로그램을 종료한다. 이는 panic-catch를 주된 에러 처리 매커니즘으로 사용할 수 없는 이유이기도 하다.</p>
+<p>(<code>panic = &quot;abort&quot;</code>가 아니더라도, 일부 panic은 무조건 <code>panic = &quot;abort&quot;</code>인 것처럼 동작한다. 대표적인 예시로 메모리가 부족하여 할당에 실패하는 경우가 있다.)</p>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p><a href="https://doc.rust-lang.org/nomicon/unwinding.html">https://doc.rust-lang.org/nomicon/unwinding.html</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>© 2019-2023 Nam Junghyun</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "152863abaa9948f9bb84e53ef4204e47"}'></script>
+
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

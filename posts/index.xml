@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
-    <lastBuildDate>Sat, 07 Jan 2023 23:26:51 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 26 Jan 2023 20:58:44 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Rust의 에러 처리, Part 2</title>
+      <link>http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/</link>
+      <pubDate>Thu, 26 Jan 2023 20:58:44 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;../error-handling-story-in-rust-part-1&#34;&gt;[Rust의 에러 처리, Part 1]&lt;/a&gt;에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>Rust의 에러 처리, Part 1</title>
       <link>http://blog.cro.sh/posts/error-handling-story-in-rust-part-1/</link>
