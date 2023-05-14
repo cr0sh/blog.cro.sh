@@ -2,11 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://blog.cro.sh/posts/lua-for-python-users/</loc>
+    <lastmod>2023-05-14T09:35:34+09:00</lastmod>
+  </url><url>
     <loc>http://blog.cro.sh/</loc>
-    <lastmod>2023-01-26T20:58:44+09:00</lastmod>
+    <lastmod>2023-05-14T09:35:34+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/posts/</loc>
-    <lastmod>2023-01-26T20:58:44+09:00</lastmod>
+    <lastmod>2023-05-14T09:35:34+09:00</lastmod>
   </url><url>
     <loc>http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/</loc>
     <lastmod>2023-01-26T20:58:44+09:00</lastmod>
