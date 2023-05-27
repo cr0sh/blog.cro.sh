@@ -7,7 +7,23 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
-    <lastBuildDate>Sun, 21 May 2023 11:13:05 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 27 May 2023 21:42:40 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Graph</title>
+      <link>http://blog.cro.sh/posts/the-graph/</link>
+      <pubDate>Sat, 27 May 2023 21:42:40 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/the-graph/</guid>
+      <description>GraphQL GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 &amp;amp; 런타임이다.
+The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.
+이 글은 전반적으로 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.
+Subgraph https://thegraph.com/docs/en/developing/creating-a-subgraph
+블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.
+yarn global add @graphprotocol/graph-cli
+Subgraph는 세 가지 파일들로 구성된다.
+subgraph.yaml: 매니페스트 schema.</description>
+    </item>
+    
     <item>
       <title>Serde Interface</title>
       <link>http://blog.cro.sh/posts/serde-interface/</link>

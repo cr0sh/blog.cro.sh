@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>The Graph | Option::None</title>
+<meta name="keywords" content="">
+<meta name="description" content="GraphQL GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 &amp; 런타임이다.
+The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.
+이 글은 전반적으로 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.
+Subgraph https://thegraph.com/docs/en/developing/creating-a-subgraph
+블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.
+yarn global add @graphprotocol/graph-cli
+Subgraph는 세 가지 파일들로 구성된다.
+subgraph.yaml: 매니페스트 schema.">
+<meta name="author" content="">
+<link rel="canonical" href="http://blog.cro.sh/posts/the-graph/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.3613efbd0b1772781e8f49935e973cae632a7f61471c05b17be155505ccf87b5.css" integrity="sha256-NhPvvQsXcngej0mTXpc8rmMqf2FHHAWxe&#43;FVUFzPh7U=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://blog.cro.sh/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://blog.cro.sh/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://blog.cro.sh/apple-touch-icon.png">
+<link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><link rel="stylesheet" href="http://blog.cro.sh/css/fix-ios-hljs.css"><meta property="og:title" content="The Graph" />
+<meta property="og:description" content="GraphQL GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 &amp; 런타임이다.
+The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.
+이 글은 전반적으로 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.
+Subgraph https://thegraph.com/docs/en/developing/creating-a-subgraph
+블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.
+yarn global add @graphprotocol/graph-cli
+Subgraph는 세 가지 파일들로 구성된다.
+subgraph.yaml: 매니페스트 schema." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://blog.cro.sh/posts/the-graph/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-05-27T21:42:40+09:00" />
+<meta property="article:modified_time" content="2023-05-27T21:42:40+09:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="The Graph"/>
+<meta name="twitter:description" content="GraphQL GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 &amp; 런타임이다.
+The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.
+이 글은 전반적으로 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.
+Subgraph https://thegraph.com/docs/en/developing/creating-a-subgraph
+블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.
+yarn global add @graphprotocol/graph-cli
+Subgraph는 세 가지 파일들로 구성된다.
+subgraph.yaml: 매니페스트 schema."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://blog.cro.sh/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "The Graph",
+      "item": "http://blog.cro.sh/posts/the-graph/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Graph",
+  "name": "The Graph",
+  "description": "GraphQL GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 \u0026amp; 런타임이다.\nThe Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.\n이 글은 전반적으로 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.\nSubgraph https://thegraph.com/docs/en/developing/creating-a-subgraph\n블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.\nyarn global add @graphprotocol/graph-cli\nSubgraph는 세 가지 파일들로 구성된다.\nsubgraph.yaml: 매니페스트 schema.",
+  "keywords": [
+    
+  ],
+  "articleBody": "GraphQL GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 \u0026 런타임이다.\nThe Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.\n이 글은 전반적으로 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.\nSubgraph https://thegraph.com/docs/en/developing/creating-a-subgraph\n블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.\nyarn global add @graphprotocol/graph-cli\nSubgraph는 세 가지 파일들로 구성된다.\nsubgraph.yaml: 매니페스트 schema.graphql: GraphQL 스키마. 어떤 데이터가 저장되고 어떻게 쿼리될지 정의한다. AssemblyScript Mappings: AssemblyScript(제한된 Typescript) 코드. 이벤트 데이터를 엔티티로 변환하는 법을 정의한다. DataSource =contract. Subgraph가 이벤트/call/block에 대한 데이터를 받아오게 될 대상이다. 예를 들어, Uniswap V2 Pool 컨트랙트 각각이 dataSource가 되어 swap 등의 이벤트를 받아오게 된다.\nManifest Subgraph의 속성들을 서술하는 파일이다. https://thegraph.com/docs/en/developing/creating-a-subgraph\nABI Data source로 지정된 컨트랙트의 ABI는 Graph CLI가 Etherscan을 조회해 자동으로 다운받는 것이 기본값이며 --abi 로 지정할 수도 있다.\nGraphQL IDL Specs https://thegraph.com/docs/en/querying/graphql-api 참조\nhttps://graphql.org/learn/schema 도 또한 참고할 만 하다.\nEntities schema.graphql에서 정의한다. @entity directive를 붙여서 정의하면 되며, 가변성이 필요한 게 아니라면 @entity(immutable: true)로 불변 엔티티로서 정의하는 것을 추천한다. 불변 엔티티가 더 저장하고 쿼리하기 빠르기 때문이다.\n이벤트나 함수 호출을 엔티티로 1:1 대응하는 것보다는 공통된 속성을 모아서 엔티티로 정의하는 것이 권장된다.\n각 엔티티는 id 필드를 항상 가져야 하며 Bytes! 혹은 String! (human-readable text가 아닌 한 Bytes! 권장)으로 정의해야 한다(!은 required field를 의미). id 필드에는 다음과 같은 값을 설정해볼 수 있다. (참고: String임)\nevent.params.id.toHex() event.transaction.from.toHex() event.transaction.hash.toHex() + \"-\" + event.logIndex.toString() 엔티티의 스칼라 타입으로는 Bytes, String, Boolean, Int (참고: 32비트), BigInt, BigDecimal 을 지원한다.\nRelationships 한 엔티티의 필드에서 다른 엔티티를 참조함으로서 관계를 표현할 수 있다. 참조는 기본적으로 단방향이나 서로가 참조함으로서 양방향 관계도 표현 가능하다.\nOne-to-One 단순히 서로의 필드를 참조하기만 하면 된다.\ntype Transaction @entity(immutable: true) { id: Bytes! transactionReceipt: TransactionReceipt } type TransactionReceipt @entity(immutable: true) { id: Bytes! transaction: Transaction } One-to-Many 단순히 array를 통해 one-to-many를 표현하는 것은 성능 패널티가 있다. ‘Many’ 쪽에서 @derivedFrom directive을 사용해서 표현하면 성능이 훨씬 나아진다.\ntype Token @entity(immutable: true) { id: Bytes! tokenBalances: [TokenBalance!]! @derivedFrom(field: \"token\") } type TokenBalance @entity { id: Bytes! amount: Int! token: Token! } Many-to-Many 두 가지 방법이 있다. 첫 번째 방법은 array를 통해 한쪽 방향 관계를 표현하고 반대방향은 @derivedFrom 을 이용하는 것이다.\ntype Organization @entity { id: Bytes! name: String! members: [User!]! } type User @entity { id: Bytes! name: String! organizations: [Organization!]! @derivedFrom(field: \"members\") } 성능적으로 더 나은 방법은 인접 리스트와 같이 연결 자체를 엔티티로서 표현하는 것이다. 이로서 양쪽 모두 @derivedFrom 을 사용할 수 있게 된다.\ntype Organization @entity { id: Bytes! name: String! members: [UserOrganization!]! @derivedFrom(field: \"organization\") } type User @entity { id: Bytes! name: String! organizations: [UserOrganization!] @derivedFrom(field: \"user\") } type UserOrganization @entity { id: Bytes! # Set to `user.id.concat(organization.id)` user: User! organization: Organization! } 대신에 쿼리문이 인접 리스트 기반으로 이루어지기 때문에 한 단계 더 들어가게 된다는 점을 인지해야 한다.\nquery usersWithOrganizations { users { organizations { # this is a UserOrganization entity organization { name } } } } Comments GraphQL 스펙에 따라, 문자열을 필드 위에 두어서 주석을 표현할 수 있다.\ntype MyFirstEntity @entity { \"unique identifier and primary key of the entity\" id: Bytes! address: Bytes! } Data Source Templates Uniswap pool과 같이, 이더리움에서는 registry/factory contract가 있어 이들이 임의 개수의 새로운 contract를 ‘찍어내는’ 패턴이 흔한 편이다. 임의 개수에서 알 수 있듯이 이러한 경우에는 어떤 컨트랙트를 추적할 지 미리 파악이 불가능하다는 문제가 있다. 이런 경우에 data source template를 사용하면 된다.\nMain contract에 대해 (일반적인) data source를 정의하고, 거기서 동적으로 생성되는 컨트랙트들에 대해 data source template를 정의하는 방식이며, 자세한 코드는 https://thegraph.com/docs/en/developing/creating-a-subgraph 를 참고하면 좋다.\nCall Handlers 가스비를 아끼기 위해 이벤트 로그를 노출하지 않는 컨트랙트의 경우, 해당 컨트랙트의 함수 호출을 추적하여 이벤트처럼 취급할 수 있다. 문제는 Parity tracing API에 의존하기 때문에 일부 체인에서는 동작하지 않는다는 것이다. 자세한 내용은 https://thegraph.com/docs/en/developing/creating-a-subgraph/#call-handlers 를 참고하면 좋다.\nBlock Handlers 매 블럭 생성마다 컨트랙트의 변경사항을 추적할 수 있는 핸들러이며, 필터를 걸어서 특정 조건에 따라서만 실행할 수도 있다. (현재 유일하게 존재하는 call 필터는 해당 컨트랙트에 대한 호출이 블럭 내에 있는 경우에만으로 한정 가능하나, 이 역시 Parity tracing API에 의존하는 문제가 있음)\n자세한 내용은 https://thegraph.com/docs/en/developing/creating-a-subgraph/#block-handlers 을 참고하면 좋다.\nTx Receipts in Event Handlers 매니페스트에서 이벤트 핸들러 속성 receipt: true 를 줌으로서 Event.receipt 필드에 대한 접근이 활성화된다. 이 경우 해당 트랜잭션의 receipt에 접근 가능하다. (가스비 등?)\nGrafting 모든 data source가 제네시스(혹은 startBlock)부터 인덱싱하면 리소스 낭비가 심하기 때문에, 기존 data source에서 데이터를 재활용할 수 있는데 이를 grafting이라 한다. 여러 제약사항이 있기 때문에 개발 용도로나 긴급상황일 때만 하는 것을 추천한다.\n",
+  "wordCount" : "707",
+  "inLanguage": "en",
+  "datePublished": "2023-05-27T21:42:40+09:00",
+  "dateModified": "2023-05-27T21:42:40+09:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://blog.cro.sh/posts/the-graph/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Option::None",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://blog.cro.sh/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://blog.cro.sh/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      The Graph
+    </h1>
+    <div class="post-meta"><span title='2023-05-27 21:42:40 +0900 KST'>May 27, 2023</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h1 id="graphql">GraphQL<a hidden class="anchor" aria-hidden="true" href="#graphql">#</a></h1>
+<p>GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 &amp; 런타임이다.</p>
+<p>The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.</p>
+<blockquote>
+<p>이 글은 전반적으로 <a href="https://thegraph.com/docs/en/developing/creating-a-subgraph">https://thegraph.com/docs/en/developing/creating-a-subgraph</a> 를 요약한 것이다. 원문과 충돌하는 부분이 있을 경우 원문이 우선한다.</p>
+</blockquote>
+<h1 id="subgraph">Subgraph<a hidden class="anchor" aria-hidden="true" href="#subgraph">#</a></h1>
+<p><a href="https://thegraph.com/docs/en/developing/creating-a-subgraph/"></a><a href="https://thegraph.com/docs/en/developing/creating-a-subgraph">https://thegraph.com/docs/en/developing/creating-a-subgraph</a></p>
+<p>블록체인에서 데이터를 뽑아 인덱싱하기 위해서는 subgraph를 정의해야 한다. 다루려면 Graph CLI를 설치할 필요가 있다.</p>
+<p><code>yarn global add @graphprotocol/graph-cli</code></p>
+<p>Subgraph는 세 가지 파일들로 구성된다.</p>
+<ul>
+<li><code>subgraph.yaml</code>: 매니페스트</li>
+<li><code>schema.graphql</code>: GraphQL 스키마. 어떤 데이터가 저장되고 어떻게 쿼리될지 정의한다.</li>
+<li>AssemblyScript Mappings: AssemblyScript(제한된 Typescript) 코드. 이벤트 데이터를 엔티티로 변환하는 법을 정의한다.</li>
+</ul>
+<h1 id="datasource">DataSource<a hidden class="anchor" aria-hidden="true" href="#datasource">#</a></h1>
+<p>=contract. Subgraph가 이벤트/call/block에 대한 데이터를 받아오게 될 대상이다. 예를 들어, Uniswap V2 Pool 컨트랙트 각각이 dataSource가 되어 swap 등의 이벤트를 받아오게 된다.</p>
+<h2 id="manifest">Manifest<a hidden class="anchor" aria-hidden="true" href="#manifest">#</a></h2>
+<p>Subgraph의 속성들을 서술하는 파일이다. <a href="https://thegraph.com/docs/en/developing/creating-a-subgraph/"></a><a href="https://thegraph.com/docs/en/developing/creating-a-subgraph">https://thegraph.com/docs/en/developing/creating-a-subgraph</a></p>
+<h2 id="abi">ABI<a hidden class="anchor" aria-hidden="true" href="#abi">#</a></h2>
+<p>Data source로 지정된 컨트랙트의 ABI는 Graph CLI가 Etherscan을 조회해 자동으로 다운받는 것이 기본값이며 <code>--abi &lt;FILE&gt;</code>로 지정할 수도 있다.</p>
+<h2 id="graphql-idl-specs">GraphQL IDL Specs<a hidden class="anchor" aria-hidden="true" href="#graphql-idl-specs">#</a></h2>
+<p><a href="https://thegraph.com/docs/en/querying/graphql-api/"></a><a href="https://thegraph.com/docs/en/querying/graphql-api">https://thegraph.com/docs/en/querying/graphql-api</a> 참조</p>
+<p><a href="https://graphql.org/learn/schema/"></a><a href="https://graphql.org/learn/schema">https://graphql.org/learn/schema</a> 도 또한 참고할 만 하다.</p>
+<h1 id="entities">Entities<a hidden class="anchor" aria-hidden="true" href="#entities">#</a></h1>
+<p><code>schema.graphql</code>에서 정의한다. <code>@entity</code> directive를 붙여서 정의하면 되며, 가변성이 필요한 게 아니라면 <code>@entity(immutable: true)</code>로 불변 엔티티로서 정의하는 것을 추천한다. 불변 엔티티가 더 저장하고 쿼리하기 빠르기 때문이다.</p>
+<p>이벤트나 함수 호출을 엔티티로 1:1 대응하는 것보다는 공통된 속성을 모아서 엔티티로 정의하는 것이 권장된다.</p>
+<p>각 엔티티는 <code>id</code> 필드를 항상 가져야 하며 <code>Bytes!</code> 혹은 <code>String!</code> (human-readable text가 아닌 한 <code>Bytes!</code> 권장)으로 정의해야 한다(<code>!</code>은 required field를 의미). <code>id</code> 필드에는 다음과 같은 값을 설정해볼 수 있다. (참고: String임)</p>
+<ul>
+<li><code>event.params.id.toHex()</code></li>
+<li><code>event.transaction.from.toHex()</code></li>
+<li><code>event.transaction.hash.toHex() + &quot;-&quot; + event.logIndex.toString()</code></li>
+</ul>
+<p>엔티티의 스칼라 타입으로는 <code>Bytes</code>, <code>String</code>, <code>Boolean</code>, <code>Int</code> (참고: 32비트), <code>BigInt</code>, <code>BigDecimal</code> 을 지원한다.</p>
+<h2 id="relationships">Relationships<a hidden class="anchor" aria-hidden="true" href="#relationships">#</a></h2>
+<p>한 엔티티의 필드에서 다른 엔티티를 참조함으로서 관계를 표현할 수 있다. 참조는 기본적으로 단방향이나 서로가 참조함으로서 양방향 관계도 표현 가능하다.</p>
+<h3 id="one-to-one">One-to-One<a hidden class="anchor" aria-hidden="true" href="#one-to-one">#</a></h3>
+<p>단순히 서로의 필드를 참조하기만 하면 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Transaction</span> <span style="color:#a6e22e">@entity</span>(immutable: <span style="color:#a6e22e">true</span>) {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  transactionReceipt: <span style="color:#a6e22e">TransactionReceipt</span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">TransactionReceipt</span> <span style="color:#a6e22e">@entity</span>(immutable: <span style="color:#a6e22e">true</span>) {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  transaction: <span style="color:#a6e22e">Transaction</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="one-to-many">One-to-Many<a hidden class="anchor" aria-hidden="true" href="#one-to-many">#</a></h3>
+<p>단순히 array를 통해 one-to-many를 표현하는 것은 성능 패널티가 있다. ‘Many’ 쪽에서 <code>@derivedFrom</code> directive을 사용해서 표현하면 성능이 훨씬 나아진다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Token</span> <span style="color:#a6e22e">@entity</span>(immutable: <span style="color:#a6e22e">true</span>) {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  tokenBalances: [<span style="color:#a6e22e">TokenBalance</span>!]! <span style="color:#a6e22e">@derivedFrom</span>(field: <span style="color:#e6db74">&#34;token&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">type</span> TokenBalance <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  amount: <span style="color:#a6e22e">Int</span>!
+</span></span><span style="display:flex;"><span>  token: <span style="color:#a6e22e">Token</span>!
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h3 id="many-to-many">Many-to-Many<a hidden class="anchor" aria-hidden="true" href="#many-to-many">#</a></h3>
+<p>두 가지 방법이 있다. 첫 번째 방법은 array를 통해 한쪽 방향 관계를 표현하고 반대방향은 <code>@derivedFrom</code> 을 이용하는 것이다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Organization</span> <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  name: <span style="color:#a6e22e">String</span>!
+</span></span><span style="display:flex;"><span>  members: [<span style="color:#a6e22e">User</span>!]!
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">User</span> <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  name: <span style="color:#a6e22e">String</span>!
+</span></span><span style="display:flex;"><span>  organizations: [<span style="color:#a6e22e">Organization</span>!]! <span style="color:#a6e22e">@derivedFrom</span>(field: <span style="color:#e6db74">&#34;members&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>성능적으로 더 나은 방법은 인접 리스트와 같이 연결 자체를 엔티티로서 표현하는 것이다. 이로서 양쪽 모두 <code>@derivedFrom</code> 을 사용할 수 있게 된다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Organization</span> <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  name: <span style="color:#a6e22e">String</span>!
+</span></span><span style="display:flex;"><span>  members: [<span style="color:#a6e22e">UserOrganization</span>!]! <span style="color:#a6e22e">@derivedFrom</span>(field: <span style="color:#e6db74">&#34;organization&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">type</span> User <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  name: <span style="color:#a6e22e">String</span>!
+</span></span><span style="display:flex;"><span>  organizations: [<span style="color:#a6e22e">UserOrganization</span>!] <span style="color:#a6e22e">@derivedFrom</span>(field: <span style="color:#e6db74">&#34;user&#34;</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">type</span> UserOrganization <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>! <span style="color:#75715e"># Set to `user.id.concat(organization.id)`</span>
+</span></span><span style="display:flex;"><span>  user: <span style="color:#a6e22e">User</span>!
+</span></span><span style="display:flex;"><span>  organization: <span style="color:#a6e22e">Organization</span>!
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>대신에 쿼리문이 인접 리스트 기반으로 이루어지기 때문에 한 단계 더 들어가게 된다는 점을 인지해야 한다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">query</span> <span style="color:#a6e22e">usersWithOrganizations</span> {
+</span></span><span style="display:flex;"><span>  users {
+</span></span><span style="display:flex;"><span>    organizations {
+</span></span><span style="display:flex;"><span>      <span style="color:#75715e"># this is a UserOrganization entity</span>
+</span></span><span style="display:flex;"><span>      organization {
+</span></span><span style="display:flex;"><span>        name
+</span></span><span style="display:flex;"><span>      }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="comments">Comments<a hidden class="anchor" aria-hidden="true" href="#comments">#</a></h2>
+<p>GraphQL 스펙에 따라, 문자열을 필드 위에 두어서 주석을 표현할 수 있다.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-graphql" data-lang="graphql"><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">MyFirstEntity</span> <span style="color:#a6e22e">@entity</span> {
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;unique identifier and primary key of the entity&#34;</span>
+</span></span><span style="display:flex;"><span>  id: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>  address: <span style="color:#a6e22e">Bytes</span>!
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h1 id="data-source-templates">Data Source Templates<a hidden class="anchor" aria-hidden="true" href="#data-source-templates">#</a></h1>
+<p>Uniswap pool과 같이, 이더리움에서는 registry/factory contract가 있어 이들이 임의 개수의 새로운 contract를 ‘찍어내는’ 패턴이 흔한 편이다. 임의 개수에서 알 수 있듯이 이러한 경우에는 어떤 컨트랙트를 추적할 지 미리 파악이 불가능하다는 문제가 있다. 이런 경우에 data source template를 사용하면 된다.</p>
+<p>Main contract에 대해 (일반적인) data source를 정의하고, 거기서 동적으로 생성되는 컨트랙트들에 대해 data source template를 정의하는 방식이며, 자세한 코드는 <a href="https://thegraph.com/docs/en/developing/creating-a-subgraph/"></a><a href="https://thegraph.com/docs/en/developing/creating-a-subgraph">https://thegraph.com/docs/en/developing/creating-a-subgraph</a> 를 참고하면 좋다.</p>
+<h1 id="call-handlers">Call Handlers<a hidden class="anchor" aria-hidden="true" href="#call-handlers">#</a></h1>
+<p>가스비를 아끼기 위해 이벤트 로그를 노출하지 않는 컨트랙트의 경우, 해당 컨트랙트의 함수 호출을 추적하여 이벤트처럼 취급할 수 있다. 문제는 Parity tracing API에 의존하기 때문에 일부 체인에서는 동작하지 않는다는 것이다. 자세한 내용은 <a href="https://thegraph.com/docs/en/developing/creating-a-subgraph/#call-handlers">https://thegraph.com/docs/en/developing/creating-a-subgraph/#call-handlers</a> 를 참고하면 좋다.</p>
+<h1 id="block-handlers">Block Handlers<a hidden class="anchor" aria-hidden="true" href="#block-handlers">#</a></h1>
+<p>매 블럭 생성마다 컨트랙트의 변경사항을 추적할 수 있는 핸들러이며, 필터를 걸어서 특정 조건에 따라서만 실행할 수도 있다. (현재 유일하게 존재하는 <code>call</code> 필터는 해당 컨트랙트에 대한 호출이 블럭 내에 있는 경우에만으로 한정 가능하나, 이 역시 Parity tracing API에 의존하는 문제가 있음)</p>
+<p>자세한 내용은 <a href="https://thegraph.com/docs/en/developing/creating-a-subgraph/#block-handlers">https://thegraph.com/docs/en/developing/creating-a-subgraph/#block-handlers</a> 을 참고하면 좋다.</p>
+<h1 id="tx-receipts-in-event-handlers">Tx Receipts in Event Handlers<a hidden class="anchor" aria-hidden="true" href="#tx-receipts-in-event-handlers">#</a></h1>
+<p>매니페스트에서 이벤트 핸들러 속성 <code>receipt: true</code> 를 줌으로서 <code>Event.receipt</code> 필드에 대한 접근이 활성화된다. 이 경우 해당 트랜잭션의 receipt에 접근 가능하다. (가스비 등?)</p>
+<h1 id="grafting">Grafting<a hidden class="anchor" aria-hidden="true" href="#grafting">#</a></h1>
+<p>모든 data source가 제네시스(혹은 startBlock)부터 인덱싱하면 리소스 낭비가 심하기 때문에, 기존 data source에서 데이터를 재활용할 수 있는데 이를 grafting이라 한다. 여러 제약사항이 있기 때문에 개발 용도로나 긴급상황일 때만 하는 것을 추천한다.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>© 2019-2023 Nam Junghyun</span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "152863abaa9948f9bb84e53ef4204e47"}'></script>
+
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
