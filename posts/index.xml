@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
-    <lastBuildDate>Sat, 27 May 2023 21:42:40 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 29 May 2023 19:21:34 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Demystifying Functional Effect Systems in Rust (Part 1)</title>
+      <link>http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/</link>
+      <pubDate>Mon, 29 May 2023 19:21:34 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/</guid>
+      <description>&lt;p&gt;Effect system을 공부하던 중, &lt;a href=&#34;https://medium.com/wix-engineering/demystifying-functional-effect-systems-in-scala-14419039a423&#34;&gt;Demystifying Functional Effect Systems in Scala&lt;/a&gt;라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>The Graph</title>
       <link>http://blog.cro.sh/posts/the-graph/</link>
