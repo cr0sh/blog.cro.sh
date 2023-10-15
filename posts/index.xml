@@ -7,7 +7,16 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>ko-kr</language>
     <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
-    <lastBuildDate>Sun, 04 Jun 2023 21:27:49 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 15 Oct 2023 17:38:26 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>나의 트레이딩 봇 자랑</title>
+      <link>http://blog.cro.sh/posts/my-trading-bots/</link>
+      <pubDate>Sun, 15 Oct 2023 17:38:26 +0900</pubDate>
+      
+      <guid>http://blog.cro.sh/posts/my-trading-bots/</guid>
+      <description>&lt;p&gt;그동안 열심히 만든 트레이딩 봇을 거의 완성했다. 장장 8개월간 했떤 나의 엔지니어링에 대한 자랑 겸 스토리를 써보고자 한다.&lt;/p&gt;</description>
+    </item>
+    
     <item>
       <title>ETHSeoul 2023 Hackathon Review</title>
       <link>http://blog.cro.sh/posts/ethseoul2023-review/</link>
