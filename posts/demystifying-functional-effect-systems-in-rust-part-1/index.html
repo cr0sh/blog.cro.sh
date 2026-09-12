@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="en" dir="auto" data-theme="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,9 +10,7 @@
 <meta name="description" content="Effect system을 공부하던 중, Demystifying Functional Effect Systems in Scala라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.">
 <meta name="author" content="">
 <link rel="canonical" href="http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.3613efbd0b1772781e8f49935e973cae632a7f61471c05b17be155505ccf87b5.css" integrity="sha256-NhPvvQsXcngej0mTXpc8rmMqf2FHHAWxe&#43;FVUFzPh7U=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
+<link crossorigin="anonymous" href="/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css" integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://blog.cro.sh/favicon-32x32.png">
@@ -20,6 +18,7 @@
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/">
 <noscript>
     <style>
         #theme-toggle,
@@ -37,35 +36,47 @@
                 --secondary: rgb(155, 156, 157);
                 --tertiary: rgb(65, 66, 68);
                 --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
+                --code-block-bg: rgb(46, 46, 51);
                 --code-bg: rgb(55, 56, 62);
                 --border: rgb(51, 51, 51);
+                color-scheme: dark;
             }
 
             .list {
                 background: var(--theme);
             }
 
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
+            .toc {
+                background: var(--entry);
             }
         }
 
     </style>
-</noscript><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><link rel="stylesheet" href="http://blog.cro.sh/css/fix-ios-hljs.css"><meta property="og:title" content="Demystifying Functional Effect Systems in Rust (Part 1)" />
-<meta property="og:description" content="Effect system을 공부하던 중, Demystifying Functional Effect Systems in Scala라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/" /><meta property="article:section" content="posts" />
-<meta property="article:published_time" content="2023-05-29T19:21:34+09:00" />
-<meta property="article:modified_time" content="2023-05-29T19:21:34+09:00" />
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
 
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Demystifying Functional Effect Systems in Rust (Part 1)"/>
-<meta name="twitter:description" content="Effect system을 공부하던 중, Demystifying Functional Effect Systems in Scala라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다."/>
+</script><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><link rel="stylesheet" href="http://blog.cro.sh/css/fix-ios-hljs.css"><meta property="og:url" content="http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/">
+  <meta property="og:site_name" content="Option::None">
+  <meta property="og:title" content="Demystifying Functional Effect Systems in Rust (Part 1)">
+  <meta property="og:description" content="Effect system을 공부하던 중, Demystifying Functional Effect Systems in Scala라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.">
+  <meta property="og:locale" content="ko_kr">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-05-29T19:21:34+09:00">
+    <meta property="article:modified_time" content="2023-05-29T19:21:34+09:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Demystifying Functional Effect Systems in Rust (Part 1)">
+  <meta name="twitter:description" content="Effect system을 공부하던 중, Demystifying Functional Effect Systems in Scala라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.">
 
 
 <script type="application/ld+json">
@@ -118,31 +129,19 @@
 }
 </script>
 </head>
-
-<body class="" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
-    <nav class="nav">
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
         <div class="logo">
             <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
             <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -158,7 +157,7 @@
                 </button>
             </div>
         </div>
-        <ul id="menu">
+        <ul id="menu" class="menu">
             <li>
                 <a href="http://blog.cro.sh/search/" title="Search (Alt &#43; /)" accesskey=/>
                     <span>Search</span>
@@ -172,14 +171,16 @@
 <article class="post-single">
   <header class="post-header">
     
-    <h1 class="post-title">
+    <h1 class="post-title entry-hint-parent">
       Demystifying Functional Effect Systems in Rust (Part 1)
     </h1>
-    <div class="post-meta"><span title='2023-05-29 19:21:34 +0900 KST'>May 29, 2023</span>
+    <div class="post-meta">
+
+<span title='2023-05-29 19:21:34 +0900 KST'>2023년 5월 29일</span>
 
 </div>
   </header> 
-  <div class="post-content"><p>Effect system을 공부하던 중, <a href="https://medium.com/wix-engineering/demystifying-functional-effect-systems-in-scala-14419039a423">Demystifying Functional Effect Systems in Scala</a>라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.</p>
+  <div class="post-content md-content"><p>Effect system을 공부하던 중, <a href="https://medium.com/wix-engineering/demystifying-functional-effect-systems-in-scala-14419039a423">Demystifying Functional Effect Systems in Scala</a>라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.</p>
 <blockquote>
 <p>프로그래밍 언어 이론을 공부하는 초심자의 시선에서 작성했기 때문에 내용에 부정확한 점이나 오역이 있을 수 있습니다. 이메일 <a href="mailto:hyun@cro.sh">hyun@cro.sh</a> 로 연락 주시면 정정하겠습니다. 감사합니다.</p>
 </blockquote>
@@ -187,7 +188,7 @@
 <p>이펙트는 일반적으로 IO 모나드의 개념에서 출발한다. IO 모나드는 인자 없는 함수를 감싸 효과(이펙트)를 (필요하면) 만들어내고 반환값을 생성해내는 객체<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>다. 모나드가 됨으로서 여러 개의 &lsquo;감싸진&rsquo; (혹은 일시정지된) 이펙트가 합성되어 이펙트들의 순차적 실행을 표현할 수 있게 된다.</p>
 <p>참고로, 일반적인 모나드에 대한 설명은 이 글에서 다루지 않으나, 이러한 개념을 이해하는 것은 이 글을 따라가는 데 상당히 중요할 것이다.</p>
 <p>기본적인 IO 모나드는 아마도 다음과 같은 trait으로 정의할 수 있을 텐데, <code>ToyIo::effect</code> 생성자(대개 <code>pure</code>라는 이름으로도 불려짐)를 통해 실존하는 &rsquo;toy&rsquo; 구현체를 생성할 수 있게 된다(아직 세부적인 구현은 이루어지지 않음).</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> IoExt: <span style="color:#a6e22e">Io</span> <span style="color:#f92672">+</span> Sized {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> IoExt: <span style="color:#a6e22e">Io</span> <span style="color:#f92672">+</span> Sized {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">flat_map</span><span style="color:#f92672">&lt;</span>R: <span style="color:#a6e22e">Io</span>, F: FnOnce(Self::Success) -&gt; <span style="color:#a6e22e">R</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">FlatMap</span><span style="color:#f92672">&lt;</span>Self, F<span style="color:#f92672">&gt;</span>;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">map</span><span style="color:#f92672">&lt;</span>S, F: FnOnce(Self::Success) -&gt; <span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">Map</span><span style="color:#f92672">&lt;</span>Self, F<span style="color:#f92672">&gt;</span>;
@@ -210,7 +211,7 @@
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// ToyIo는 Io를 구현하는 어떠한 구조체 타입이다. 자세한 구현은 뒤에 나온다.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>(T);
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span>(T);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T, F: FnOnce() -&gt; <span style="color:#a6e22e">T</span><span style="color:#f92672">&gt;</span> ToyIo<span style="color:#f92672">&lt;</span>F<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">effect</span>(f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">Self</span> {
@@ -222,10 +223,10 @@
 <p>실제 코드에서는 <code>flat_map</code>, <code>map</code>을 <code>IoExt</code> extension trait으로 구현하었고 뒤따라오는 코드들에서도 해당 구현을 기반으로 작성될 예정이다.</p>
 </blockquote>
 <p>이제 우리는 IO로 감싸진 이펙트들을 조합해 어떤 프로그램이든 만들어낼 수 있다:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">program</span>() {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">program</span>() {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">use</span> std::io::{self, BufRead};
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    ToyIo::effect(<span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;what&#39;s your name?&#34;</span>))
+</span></span><span style="display:flex;"><span>    ToyIo::effect(<span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;what&#39;s your name?&#34;</span>))
 </span></span><span style="display:flex;"><span>        .flat_map(<span style="color:#f92672">|</span>()<span style="color:#f92672">|</span> {
 </span></span><span style="display:flex;"><span>            ToyIo::effect(<span style="color:#f92672">||</span> {
 </span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> stdin <span style="color:#f92672">=</span> io::stdin().lock();
@@ -234,7 +235,7 @@
 </span></span><span style="display:flex;"><span>                buf
 </span></span><span style="display:flex;"><span>            })
 </span></span><span style="display:flex;"><span>        })
-</span></span><span style="display:flex;"><span>        .map(<span style="color:#f92672">|</span>name<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#66d9ef">move</span> <span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;hello, </span><span style="color:#e6db74">{name}</span><span style="color:#e6db74">!&#34;</span>)))
+</span></span><span style="display:flex;"><span>        .map(<span style="color:#f92672">|</span>name<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#66d9ef">move</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;hello, </span><span style="color:#e6db74">{name}</span><span style="color:#e6db74">!&#34;</span>)))
 </span></span><span style="display:flex;"><span>        .run();
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><blockquote>
@@ -242,11 +243,11 @@
 </blockquote>
 <h2 id="toyio-구현"><code>ToyIo</code> 구현<a hidden class="anchor" aria-hidden="true" href="#toyio-구현">#</a></h2>
 <p>이제 <code>ToyIo</code> 모나드를 본격적으로 구현해보자. <code>ToyIo</code>는 ZIO<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>의 API를 얼추 따르지만 typed error나 environment같은 기능은 단순함을 위해 제외되었다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T, F: FnOnce() -&gt; <span style="color:#a6e22e">T</span><span style="color:#f92672">&gt;</span> Io <span style="color:#66d9ef">for</span> ToyIo<span style="color:#f92672">&lt;</span>F<span style="color:#f92672">&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T, F: FnOnce() -&gt; <span style="color:#a6e22e">T</span><span style="color:#f92672">&gt;</span> Io <span style="color:#66d9ef">for</span> ToyIo<span style="color:#f92672">&lt;</span>F<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span> <span style="color:#f92672">=</span> T;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">run</span>(self) -&gt; <span style="color:#a6e22e">Self</span>::Success {
-</span></span><span style="display:flex;"><span>        todo!()
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">todo!</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
@@ -259,7 +260,7 @@
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span> <span style="color:#f92672">=</span> R::Success;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">run</span>(self) -&gt; <span style="color:#a6e22e">Self</span>::Success {
-</span></span><span style="display:flex;"><span>        todo!()
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">todo!</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
@@ -272,14 +273,14 @@
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span> <span style="color:#f92672">=</span> S;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">run</span>(self) -&gt; <span style="color:#a6e22e">Self</span>::Success {
-</span></span><span style="display:flex;"><span>        todo!()
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">todo!</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p><sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup></p>
 <blockquote>
 <p>코드가 원문에 비해 훨씬 장황한 이유는, 타입-레벨 프로그래밍과 정적 디스패치를 사용해 런타임 비용을 없애고자, 각 trait method의 리턴형을 독립된 타입으로 정의하였기 때문이다. 동적 디스패치로 처리한 코드는 그렇게 복잡하지 않다:</p>
 </blockquote>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> Io {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> Io {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span>;
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">flat_map</span><span style="color:#f92672">&lt;</span>R: <span style="color:#a6e22e">Io</span>, F: FnOnce(T) -&gt; <span style="color:#a6e22e">R</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">R</span>::Success;
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">map</span><span style="color:#f92672">&lt;</span>S, F: FnOnce(T) -&gt; <span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">S</span>;
@@ -297,14 +298,14 @@
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> Io <span style="color:#66d9ef">for</span> ToyIo<span style="color:#f92672">&lt;</span>T<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span> <span style="color:#f92672">=</span> T; 
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">flat_map</span><span style="color:#f92672">&lt;</span>R: <span style="color:#a6e22e">Io</span>, F: FnOnce(T) -&gt; <span style="color:#a6e22e">R</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">R</span>::Success {
-</span></span><span style="display:flex;"><span>        todo!()
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">todo!</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">map</span><span style="color:#f92672">&lt;</span>S, F: FnOnce(T) -&gt; <span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">S</span> { todo!()
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">map</span><span style="color:#f92672">&lt;</span>S, F: FnOnce(T) -&gt; <span style="color:#a6e22e">S</span><span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">F</span>) -&gt; <span style="color:#a6e22e">S</span> { <span style="color:#a6e22e">todo!</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">run</span>(self) -&gt; <span style="color:#a6e22e">T</span> {
-</span></span><span style="display:flex;"><span>        todo!()
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">todo!</span>()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><blockquote>
@@ -315,7 +316,7 @@
 <p>엄밀히 원문의 Scala case class를 사용한 코드를 Rust로 옮기면 열거형으로 FlatMap과 Map을 표현했어야 하나, zero-cost를 강조하기 위해 각각을 구조체로 표현하고 타입 레벨 프로그래밍을 도입하였다.</p>
 </blockquote>
 <p>이제 이 ToyIo와 친구들의 실행 방법을 정의할 차례이다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> std::error::Error;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> std::error::Error;
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">type</span> <span style="color:#a6e22e">BoxError</span> <span style="color:#f92672">=</span> Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> Error <span style="color:#f92672">+</span> Send <span style="color:#f92672">+</span> Sync <span style="color:#f92672">+</span> &#39;static<span style="color:#f92672">&gt;</span>;
 </span></span><span style="display:flex;"><span>
@@ -344,16 +345,16 @@
 <p>엄밀히 따지면, 에러를 박싱함으로서 zero-cost에서 벗어났다고도 할 수 있다. 그러나 에러 처리 자체를 zero-cost로 구현하는 것에 집중하기보다는(필자가 생각하는 선에서는 완벽한 zero-cost 에러 처리를 타입 레벨 프로그래밍으로 구현할 수는 없을 것 같다) effect system을 구현하는 것에 집중하는 것이 옳다는 판단 하에 에러를 박싱하였다.</p>
 </blockquote>
 <p>이제 <code>ToyIo</code>를 실제로 사용해보자. 그러기 위해서는 <code>ToyIo</code>를 실행해줄 실행기가 필요하다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">unsafe_run_sync</span><span style="color:#f92672">&lt;</span>R: <span style="color:#a6e22e">Run</span><span style="color:#f92672">&gt;</span>(r: <span style="color:#a6e22e">R</span>) -&gt; Result<span style="color:#f92672">&lt;</span>R::Success, Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> Error <span style="color:#f92672">+</span> Send <span style="color:#f92672">+</span> Sync <span style="color:#f92672">+</span> &#39;static<span style="color:#f92672">&gt;&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">unsafe_run_sync</span><span style="color:#f92672">&lt;</span>R: <span style="color:#a6e22e">Run</span><span style="color:#f92672">&gt;</span>(r: <span style="color:#a6e22e">R</span>) -&gt; Result<span style="color:#f92672">&lt;</span>R::Success, Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> Error <span style="color:#f92672">+</span> Send <span style="color:#f92672">+</span> Sync <span style="color:#f92672">+</span> &#39;static<span style="color:#f92672">&gt;&gt;</span> {
 </span></span><span style="display:flex;"><span>    r.eval()
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">sequence_effects</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> effect <span style="color:#f92672">=</span> ToyIo::effect(<span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;running first effect&#34;</span>))
-</span></span><span style="display:flex;"><span>        .flat_map(<span style="color:#f92672">|</span>()<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;running second effect&#34;</span>)));
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">sequence_effects</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> effect <span style="color:#f92672">=</span> ToyIo::effect(<span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;running first effect&#34;</span>))
+</span></span><span style="display:flex;"><span>        .flat_map(<span style="color:#f92672">|</span>()<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;running second effect&#34;</span>)));
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    unsafe_run_sync(effect).expect(<span style="color:#e6db74">&#34;cannot unsafe_run_sync&#34;</span>);
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>running first effect
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>running first effect
 </span></span><span style="display:flex;"><span>running second effect
 </span></span></code></pre></div><blockquote>
 <p>원문에서는 <code>unsafe_run_sync</code>이 <code>eval().unwrap()</code>을 수행하는 것에 가까우나 이는 idiomatic Rust에서 멀어지게 되므로 지양하였다.</p>
@@ -361,7 +362,7 @@
 <p>1장의 전체 코드는 <a href="https://github.com/cr0sh/demystifying-functional-effect-systems-in-rust/blob/master/iteration1/src/lib.rs">https://github.com/cr0sh/demystifying-functional-effect-systems-in-rust/blob/master/iteration1/src/lib.rs</a> 에 있다.</p>
 <h1 id="2장-에러로부터-복구하기">2장: 에러로부터 복구하기<a hidden class="anchor" aria-hidden="true" href="#2장-에러로부터-복구하기">#</a></h1>
 <p>에러 핸들링을 지원하기 위해, 어떻게 이펙트의 실패를 표현할 수 있을지 알아보자.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ToyIoFail</span><span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span>(E);
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ToyIoFail</span><span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span>(E);
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> ToyIoFail<span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">fail</span>(e: <span style="color:#a6e22e">E</span>) -&gt; <span style="color:#a6e22e">Self</span> {
@@ -371,7 +372,7 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> Io <span style="color:#66d9ef">for</span> ToyIoFail<span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span> <span style="color:#f92672">=</span> Never; <span style="color:#75715e">// #[feature(never_type)] 이 안정화되면 `!`일 것이다.
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>}
+</span></span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>E: <span style="color:#a6e22e">Error</span> <span style="color:#f92672">+</span> Send <span style="color:#f92672">+</span> Sync <span style="color:#f92672">+</span> &#39;static<span style="color:#f92672">&gt;</span> Run <span style="color:#66d9ef">for</span> ToyIoFail<span style="color:#f92672">&lt;</span>E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">eval</span>(self) -&gt; Result<span style="color:#f92672">&lt;</span>Self::Success, BoxError<span style="color:#f92672">&gt;</span> {
@@ -382,9 +383,9 @@
 </span></span><span style="display:flex;"><span><span style="color:#75715e">#[derive(Debug, Clone, Copy)]</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">Never</span> {}
 </span></span></code></pre></div><p>이제 실패한 이펙트의 복구 방법도 알아보자:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> IoExt: <span style="color:#a6e22e">Io</span> <span style="color:#f92672">+</span> Sized {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">trait</span> IoExt: <span style="color:#a6e22e">Io</span> <span style="color:#f92672">+</span> Sized {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">recover</span><span style="color:#f92672">&lt;</span>U: <span style="color:#a6e22e">Io</span><span style="color:#f92672">&lt;</span>Success <span style="color:#f92672">=</span> Self::Success<span style="color:#f92672">&gt;</span>, F: FnOnce(BoxError) -&gt; <span style="color:#a6e22e">U</span><span style="color:#f92672">&gt;</span>(
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">recover</span><span style="color:#f92672">&lt;</span>U: <span style="color:#a6e22e">Io</span><span style="color:#f92672">&lt;</span>Success <span style="color:#f92672">=</span> Self::Success<span style="color:#f92672">&gt;</span>, F: FnOnce(BoxError) -&gt; <span style="color:#a6e22e">U</span><span style="color:#f92672">&gt;</span>(
 </span></span><span style="display:flex;"><span>        self,
 </span></span><span style="display:flex;"><span>        f: <span style="color:#a6e22e">F</span>,
 </span></span><span style="display:flex;"><span>    ) -&gt; <span style="color:#a6e22e">Recover</span><span style="color:#f92672">&lt;</span>Self, F<span style="color:#f92672">&gt;</span>;
@@ -392,7 +393,7 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: <span style="color:#a6e22e">Io</span><span style="color:#f92672">&gt;</span> IoExt <span style="color:#66d9ef">for</span> T {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">recover</span><span style="color:#f92672">&lt;</span>U: <span style="color:#a6e22e">Io</span><span style="color:#f92672">&lt;</span>Success <span style="color:#f92672">=</span> T::Success<span style="color:#f92672">&gt;</span>, F: FnOnce(BoxError) -&gt; <span style="color:#a6e22e">U</span><span style="color:#f92672">&gt;</span>(
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">recover</span><span style="color:#f92672">&lt;</span>U: <span style="color:#a6e22e">Io</span><span style="color:#f92672">&lt;</span>Success <span style="color:#f92672">=</span> T::Success<span style="color:#f92672">&gt;</span>, F: FnOnce(BoxError) -&gt; <span style="color:#a6e22e">U</span><span style="color:#f92672">&gt;</span>(
 </span></span><span style="display:flex;"><span>        self,
 </span></span><span style="display:flex;"><span>        f: <span style="color:#a6e22e">F</span>,
 </span></span><span style="display:flex;"><span>    ) -&gt; <span style="color:#a6e22e">Recover</span><span style="color:#f92672">&lt;</span>Self, F<span style="color:#f92672">&gt;</span> {
@@ -421,7 +422,7 @@
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>이제 실제로 이를 사용해 오류를 복구해보자.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> std::{error::Error, fmt::Display};
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">use</span> std::{error::Error, fmt::Display};
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">use</span> <span style="color:#66d9ef">super</span>::<span style="color:#f92672">*</span>;
 </span></span><span style="display:flex;"><span>
@@ -430,21 +431,21 @@
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> Display <span style="color:#66d9ef">for</span> StrError {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">fmt</span>(<span style="color:#f92672">&amp;</span>self, f: <span style="color:#66d9ef">&amp;</span><span style="color:#a6e22e">mut</span> std::fmt::Formatter<span style="color:#f92672">&lt;</span>&#39;_<span style="color:#f92672">&gt;</span>) -&gt; <span style="color:#a6e22e">std</span>::fmt::Result {
-</span></span><span style="display:flex;"><span>        write!(f, <span style="color:#e6db74">&#34;{}&#34;</span>, self.<span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">write!</span>(f, <span style="color:#e6db74">&#34;{}&#34;</span>, self.<span style="color:#ae81ff">0</span>)
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">impl</span> Error <span style="color:#66d9ef">for</span> StrError {}
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">fail_and_recover</span>() {
-</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> effect <span style="color:#f92672">=</span> ToyIo::effect(<span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;running first effect&#34;</span>))
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> effect <span style="color:#f92672">=</span> ToyIo::effect(<span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;running first effect&#34;</span>))
 </span></span><span style="display:flex;"><span>        .flat_map(<span style="color:#f92672">|</span>()<span style="color:#f92672">|</span> ToyIoFail::fail(StrError(<span style="color:#e6db74">&#34;some error&#34;</span>)))
-</span></span><span style="display:flex;"><span>        .flat_map(<span style="color:#f92672">|</span>_<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;second effect - will not run&#34;</span>)))
-</span></span><span style="display:flex;"><span>        .recover(<span style="color:#f92672">|</span>e<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#66d9ef">move</span> <span style="color:#f92672">||</span> println!(<span style="color:#e6db74">&#34;recovered from failure: </span><span style="color:#e6db74">{e}</span><span style="color:#e6db74">&#34;</span>)));
+</span></span><span style="display:flex;"><span>        .flat_map(<span style="color:#f92672">|</span>_<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;second effect - will not run&#34;</span>)))
+</span></span><span style="display:flex;"><span>        .recover(<span style="color:#f92672">|</span>e<span style="color:#f92672">|</span> ToyIo::effect(<span style="color:#66d9ef">move</span> <span style="color:#f92672">||</span> <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;recovered from failure: </span><span style="color:#e6db74">{e}</span><span style="color:#e6db74">&#34;</span>)));
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    unsafe_run_sync(effect).expect(<span style="color:#e6db74">&#34;cannot execute&#34;</span>);
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>running first effect
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>running first effect
 </span></span><span style="display:flex;"><span>recovered from failure: some error
 </span></span></code></pre></div><p>여기까지만 해도 충분히 강력하지만, 우리의 <code>ToyIo</code> 예제는 두 가지 문제점이 있다:</p>
 <ul>
@@ -452,7 +453,7 @@
 <li>Stack-safe하지 않다.</li>
 </ul>
 <p>두 번쩨 포인트를 짚어보자면, 우리의 구현은 재귀에 의존하기 때문에 타입의 깊이가 깊어지면 그만큼 재귀의 깊이도 깊어진다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ToyIoForEach</span><span style="color:#f92672">&lt;</span>I, F<span style="color:#f92672">&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ToyIoForEach</span><span style="color:#f92672">&lt;</span>I, F<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    it: <span style="color:#a6e22e">I</span>,
 </span></span><span style="display:flex;"><span>    func: <span style="color:#a6e22e">F</span>,
 </span></span><span style="display:flex;"><span>}
@@ -470,7 +471,7 @@
 </span></span><span style="display:flex;"><span>        self.it
 </span></span><span style="display:flex;"><span>            .fold(ToyIo::effect(<span style="color:#f92672">||</span> Vec::new()), <span style="color:#f92672">|</span>acc, curr<span style="color:#f92672">|</span> {
 </span></span><span style="display:flex;"><span>                <span style="color:#75715e">// mismatched types
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                IoExt::flat_map(acc, <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> {
+</span></span></span><span style="display:flex;"><span>                IoExt::flat_map(acc, <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> {
 </span></span><span style="display:flex;"><span>                    (self.func)(curr).map(<span style="color:#f92672">|</span>y<span style="color:#f92672">|</span> {
 </span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">let</span> <span style="color:#66d9ef">mut</span> z <span style="color:#f92672">=</span> x;
 </span></span><span style="display:flex;"><span>                        z.push(y);
@@ -481,7 +482,7 @@
 </span></span><span style="display:flex;"><span>            .eval()
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>    Checking iteration2 v0.1.0 (/Users/namjh/dev/personal/demystifying-functional-effect-systems-in-rust/iteration2)
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>    Checking iteration2 v0.1.0 (/Users/namjh/dev/personal/demystifying-functional-effect-systems-in-rust/iteration2)
 </span></span><span style="display:flex;"><span>error[E0308]: mismatched types
 </span></span><span style="display:flex;"><span>   --&gt; iteration2/src/lib.rs:146:17
 </span></span><span style="display:flex;"><span>    |
@@ -505,19 +506,19 @@
 <p>생각해보니 스칼라는 동적 디스패치를 vtable로 구현하는 언어고, 그렇기 때문에 <code>flatMap</code>이 n번 중첩된 객체와 m번 중첩된 객체를 <code>TIO</code>라는 같은 trait으로 다룰 수 있다.  Rust의 문법을 빌리면, <code>ToyIo&lt;_&gt;</code>와 <code>FlatMap&lt;ToyIo&lt;_&gt;, _&gt;</code>, <code>FlatMap&lt;FlatMap&lt;...FlatMap&lt;ToyIo&lt;_&gt;, _&gt;..._&gt; _&gt;</code>이 모두 한 변수에 들어갈 수 있어야 하는 것이다. 그런데 내가 구현한 방식은 타입 레벨 프로그래밍을 사용해 정적 디스패치만을 고수하였으므로 이렇게 런타임에 디스패치를 할 수가 없다!</p>
 <p>😱</p>
 <p>해법을 찾아보자. 스칼라의 방법을 그대로 모사해서 <code>Box</code>로 type erasure을 구현할 수 있다. 원문의 코드를 가져오면 <a href="https://github.com/dkarlinsky/tio/blob/1f4f7b037b1845ea4b86fe44b640668a8f049a2c/src/main/scala/tio/TIO.scala#L13-L18">다음</a>과 같다:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#75715e">// Initial algebra
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Effect</span><span style="color:#f92672">[</span><span style="color:#66d9ef">+A</span><span style="color:#f92672">](</span>a<span style="color:#66d9ef">:</span> <span style="color:#f92672">()</span> <span style="color:#f92672">=&gt;</span> A<span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">]</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-scala" data-lang="scala"><span style="display:flex;"><span><span style="color:#75715e">// Initial algebra
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Effect</span><span style="color:#f92672">[</span><span style="color:#66d9ef">+A</span><span style="color:#f92672">](</span>a<span style="color:#66d9ef">:</span> <span style="color:#f92672">()</span> <span style="color:#f92672">=&gt;</span> A<span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">]</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Fail</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">](</span>e<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Throwable</span><span style="color:#f92672">)</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">]</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e">// Effect combinators
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FlatMap</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">](</span>tio<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">],</span> f<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">A</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">B</span><span style="color:#f92672">])</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">B</span><span style="color:#f92672">]</span>
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">FlatMap</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span>, <span style="color:#66d9ef">B</span><span style="color:#f92672">](</span>tio<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">],</span> f<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">A</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">B</span><span style="color:#f92672">])</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">B</span><span style="color:#f92672">]</span>
 </span></span><span style="display:flex;"><span><span style="color:#66d9ef">case</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Recover</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">](</span>tio<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">],</span> f<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Throwable</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">])</span> <span style="color:#66d9ef">extends</span> <span style="color:#a6e22e">TIO</span><span style="color:#f92672">[</span><span style="color:#66d9ef">A</span><span style="color:#f92672">]</span>
 </span></span></code></pre></div><p>이를 Rust enum으로 모델링해보자. Case class의 타입 파라미터가 모두 같지 않아서 불가능할 것 같지만, <code>extends TIO[_]</code>에서 <code>_</code>에 해당하는 부분을 기준으로 잡아 <code>T</code>로 통일하고 나머지 타입 파라미터를 박싱으로 지우면 가능하다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// A &#39;toy&#39; IO effect that can either succeed with `T` or fail with `E`.
-</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#e6db74">/// A &#39;toy&#39; IO effect that can either succeed with `T` or fail with `E`.
+</span></span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">enum</span> <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    Effect(Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> FnOnce() -&gt; Result<span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;&gt;</span>),
 </span></span><span style="display:flex;"><span>    Fail(E),
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Should be boxed to &#39;erase&#39; the return type of the inner effect
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    FlatMap(Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> FlatMap<span style="color:#f92672">&lt;</span>Success <span style="color:#f92672">=</span> T, Error <span style="color:#f92672">=</span> E<span style="color:#f92672">&gt;&gt;</span>),
+</span></span></span><span style="display:flex;"><span>    FlatMap(Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> FlatMap<span style="color:#f92672">&lt;</span>Success <span style="color:#f92672">=</span> T, Error <span style="color:#f92672">=</span> E<span style="color:#f92672">&gt;&gt;</span>),
 </span></span><span style="display:flex;"><span>    Recover(Box<span style="color:#f92672">&lt;</span>Self<span style="color:#f92672">&gt;</span>, Box<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">dyn</span> FnOnce(E) -&gt; <span style="color:#a6e22e">Self</span><span style="color:#f92672">&gt;</span>),
 </span></span><span style="display:flex;"><span>}
 </span></span><span style="display:flex;"><span>
@@ -536,7 +537,7 @@
 <p>enum으로 구현하는 김에, 에러 타입을 박싱하지 않도록 해 최대한 컴파일 타임에 에러를 식별할 수 있도록 해 보았다. (아마도 실용적인 면에서 <code>map_err</code> 같은 메서드가 필요할 것이다.)</p>
 </blockquote>
 <p>이제 Scala 구현을 참조해 이펙트 생성자와 친구 메서드들을 구현해주면 다음과 같다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: &#39;static, E: &#39;static<span style="color:#f92672">&gt;</span> ToyIo<span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: &#39;static, E: &#39;static<span style="color:#f92672">&gt;</span> ToyIo<span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">succeed</span>(x: <span style="color:#a6e22e">T</span>) -&gt; <span style="color:#a6e22e">Self</span> {
 </span></span><span style="display:flex;"><span>        Self::Effect(Box::new(<span style="color:#66d9ef">move</span> <span style="color:#f92672">||</span> Ok(x)))
 </span></span><span style="display:flex;"><span>    }
@@ -561,7 +562,7 @@
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>물론, <code>(ToyIo&lt;T, E&gt;, T -&gt; ToyIo&lt;U, E&gt;)</code>에서 <code>T</code>를 지워 <code>ToyIo&lt;U, E&gt;</code>의 모양새만 남기는 <code>FlatMap</code> trait의 구현도 잊어서는 안 된다:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T, U, E, F: FnOnce(T) -&gt; <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>U, E<span style="color:#f92672">&gt;&gt;</span> FlatMap <span style="color:#66d9ef">for</span> Option<span style="color:#f92672">&lt;</span>FlatMapImpl<span style="color:#f92672">&lt;</span>T, U, E, F<span style="color:#f92672">&gt;&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T, U, E, F: FnOnce(T) -&gt; <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>U, E<span style="color:#f92672">&gt;&gt;</span> FlatMap <span style="color:#66d9ef">for</span> Option<span style="color:#f92672">&lt;</span>FlatMapImpl<span style="color:#f92672">&lt;</span>T, U, E, F<span style="color:#f92672">&gt;&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Success</span> <span style="color:#f92672">=</span> U;
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">type</span> <span style="color:#a6e22e">Error</span> <span style="color:#f92672">=</span> E;
 </span></span><span style="display:flex;"><span>
@@ -574,9 +575,9 @@
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>이제 <code>Option&lt;FlatMapImpl&lt;T, U, E, F&gt;&gt;</code>를 <code>Box&lt;dyn FlatMap&lt;U, E&gt;</code>로 박싱해 <code>T</code>를 지울 수 있다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: &#39;static, E: &#39;static<span style="color:#f92672">&gt;</span> ToyIo<span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">impl</span><span style="color:#f92672">&lt;</span>T: &#39;static, E: &#39;static<span style="color:#f92672">&gt;</span> ToyIo<span style="color:#f92672">&lt;</span>T, E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    <span style="color:#75715e">// ...
-</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">flat_map</span><span style="color:#f92672">&lt;</span>U: &#39;static<span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">impl</span> FnOnce(T) -&gt; <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>U, E<span style="color:#f92672">&gt;</span> <span style="color:#f92672">+</span> &#39;static) -&gt; <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>U, E<span style="color:#f92672">&gt;</span> {
+</span></span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">flat_map</span><span style="color:#f92672">&lt;</span>U: &#39;static<span style="color:#f92672">&gt;</span>(self, f: <span style="color:#a6e22e">impl</span> FnOnce(T) -&gt; <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>U, E<span style="color:#f92672">&gt;</span> <span style="color:#f92672">+</span> &#39;static) -&gt; <span style="color:#a6e22e">ToyIo</span><span style="color:#f92672">&lt;</span>U, E<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>        ToyIo::FlatMap(Box::new(Some(FlatMapImpl {
 </span></span><span style="display:flex;"><span>            inner: <span style="color:#a6e22e">self</span>,
 </span></span><span style="display:flex;"><span>            func: <span style="color:#a6e22e">f</span>,
@@ -584,7 +585,7 @@
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>다시 본론으로 돌아와서 <code>ForEach</code>를 구현해보자. 이제는 <code>ToyIo::flat_map</code>이 <code>ToyIo</code>를 내뱉으므로 <code>flat_map</code>을 임의의 개수만큼 중첩시킬 수 있다.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ForEach</span><span style="color:#f92672">&lt;</span>I, F<span style="color:#f92672">&gt;</span> {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">ForEach</span><span style="color:#f92672">&lt;</span>I, F<span style="color:#f92672">&gt;</span> {
 </span></span><span style="display:flex;"><span>    it: <span style="color:#a6e22e">I</span>,
 </span></span><span style="display:flex;"><span>    func: <span style="color:#a6e22e">F</span>,
 </span></span><span style="display:flex;"><span>}
@@ -616,16 +617,16 @@
 </span></span><span style="display:flex;"><span>    }
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>그리고 10만번 순회하는 <code>for_each</code>를 실행하면&hellip;</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">for_each</span>() {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-rust" data-lang="rust"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">for_each</span>() {
 </span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">let</span> effect <span style="color:#f92672">=</span> ToyIo::<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">i32</span>, Infallible<span style="color:#f92672">&gt;</span>::for_each(<span style="color:#ae81ff">0</span><span style="color:#f92672">..</span><span style="color:#ae81ff">100000</span>, <span style="color:#f92672">|</span>x<span style="color:#f92672">|</span> {
 </span></span><span style="display:flex;"><span>        ToyIo::<span style="color:#f92672">&lt;</span>_, Infallible<span style="color:#f92672">&gt;</span>::effect(<span style="color:#66d9ef">move</span> <span style="color:#f92672">||</span> {
-</span></span><span style="display:flex;"><span>            println!(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{x}</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">println!</span>(<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{x}</span><span style="color:#e6db74">&#34;</span>);
 </span></span><span style="display:flex;"><span>            x
 </span></span><span style="display:flex;"><span>        })
 </span></span><span style="display:flex;"><span>    });
 </span></span><span style="display:flex;"><span>    unsafe_run_sync(effect).expect(<span style="color:#e6db74">&#34;cannot execute&#34;</span>);
 </span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>thread &#39;test::for_each&#39; has overflowed its stack
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-text" data-lang="text"><span style="display:flex;"><span>thread &#39;test::for_each&#39; has overflowed its stack
 </span></span><span style="display:flex;"><span>fatal runtime error: stack overflow
 </span></span><span style="display:flex;"><span>error: test failed, to rerun pass `--lib`
 </span></span></code></pre></div><p>너무 많이 중첩된 <code>flat_map</code>을 해석하던 중 스택 오버플로우가 발생하는 모습을 볼 수 있다.</p>
@@ -660,16 +661,21 @@
     </main>
     
 <footer class="footer">
-    <span>© 2019-2023 Nam Junghyun</span>
+        <span>© 2019-2023 Nam Junghyun</span> · 
+
+    
+    
     <span>
         Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
         <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
     </span>
 </footer>
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
     </svg>
 </a>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
@@ -677,9 +683,14 @@
 
 
 <script>
-    let menu = document.getElementById('menu')
+    let menu = document.getElementById('menu');
     if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
         menu.onscroll = function () {
             localStorage.setItem("menu-scroll-position", menu.scrollLeft);
         }
@@ -706,25 +717,25 @@
 
 </script>
 <script>
-    var mybutton = document.getElementById("top-link");
+    var toplink = document.getElementById("top-link");
     window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
         } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
+            toplink.classList.add("hidden");
         }
     };
 
 </script>
 <script>
     document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
             localStorage.setItem("pref-theme", 'light');
         } else {
-            document.body.classList.add('dark');
+            html.dataset.theme = 'dark';
             localStorage.setItem("pref-theme", 'dark');
         }
     })

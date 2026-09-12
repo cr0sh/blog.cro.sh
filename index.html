@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="en" dir="auto" data-theme="auto">
 
 <head>
-	<meta name="generator" content="Hugo 0.118.2"><meta charset="utf-8">
+	<meta name="generator" content="Hugo 0.166.0"><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
@@ -11,7 +11,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="canonical" href="http://blog.cro.sh/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.3613efbd0b1772781e8f49935e973cae632a7f61471c05b17be155505ccf87b5.css" integrity="sha256-NhPvvQsXcngej0mTXpc8rmMqf2FHHAWxe&#43;FVUFzPh7U=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.cd9298b33628769aa1bc1acebbbfd7aa11ce81dfe03484d479e1907760249a1d.css" integrity="sha256-zZKYszYodpqhvBrOu7/XqhHOgd/gNITUeeGQd2Akmh0=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://blog.cro.sh/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://blog.cro.sh/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://blog.cro.sh/favicon-32x32.png">
@@ -19,7 +19,8 @@
 <link rel="mask-icon" href="http://blog.cro.sh/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="http://blog.cro.sh/index.xml">
+<link rel="alternate" type="application/rss+xml" href="http://blog.cro.sh/index.xml" title="rss">
+<link rel="alternate" hreflang="en" href="http://blog.cro.sh/">
 <noscript>
     <style>
         #theme-toggle,
@@ -37,33 +38,42 @@
                 --secondary: rgb(155, 156, 157);
                 --tertiary: rgb(65, 66, 68);
                 --content: rgb(196, 196, 197);
-                --hljs-bg: rgb(46, 46, 51);
+                --code-block-bg: rgb(46, 46, 51);
                 --code-bg: rgb(55, 56, 62);
                 --border: rgb(51, 51, 51);
+                color-scheme: dark;
             }
 
             .list {
                 background: var(--theme);
             }
 
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
-            }
-
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
+            .toc {
+                background: var(--entry);
             }
         }
 
     </style>
-</noscript><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><link rel="stylesheet" href="http://blog.cro.sh/css/fix-ios-hljs.css"><meta property="og:title" content="Option::None" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="http://blog.cro.sh/" />
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
 
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Option::None"/>
-<meta name="twitter:description" content=""/>
+</script><link rel="stylesheet" href="http://blog.cro.sh/css/allow-horizontal-highlight-scroll.css"><link rel="stylesheet" href="http://blog.cro.sh/css/small-page-heading.css"><link rel="stylesheet" href="http://blog.cro.sh/css/fix-ios-hljs.css"><meta property="og:url" content="http://blog.cro.sh/">
+  <meta property="og:site_name" content="Option::None">
+  <meta property="og:title" content="Option::None">
+  <meta property="og:locale" content="ko_kr">
+  <meta property="og:type" content="website">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Option::None">
 
 <script type="application/ld+json">
 {
@@ -72,38 +82,26 @@
   "name": "Option::None",
   "url": "http://blog.cro.sh/",
   "description": "",
-  "thumbnailUrl": "http://blog.cro.sh/favicon.ico",
+  "logo": "http://blog.cro.sh/favicon.ico",
   "sameAs": [
       
   ]
 }
 </script>
 </head>
-
 <body class="list" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
-    <nav class="nav">
+    <header class="header">
+    <nav class="header-nav">
         <div class="logo">
             <a href="http://blog.cro.sh/" accesskey="h" title="Option::None (Alt + H)">Option::None</a>
             <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
-                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -119,7 +117,7 @@
                 </button>
             </div>
         </div>
-        <ul id="menu">
+        <ul id="menu" class="menu">
             <li>
                 <a href="http://blog.cro.sh/search/" title="Search (Alt &#43; /)" accesskey=/>
                     <span>Search</span>
@@ -133,13 +131,14 @@
     <header class="entry-header">
         <h1>A Personal Blog</h1>
     </header>
-    <div class="entry-content">
+    <div class="entry-content md-content">
+        
         <p>주로 Rust 언어에 관해 다룹니다. 비정기적으로 업데이트됩니다.</p>
 <p><a href="https://cro.sh/me-ko">Resume</a> / <a href="https://github.com/cr0sh">Github</a> / <a href="/index.xml">RSS</a></p>
 
     </div>
     <footer class="entry-footer">
-        <div class="social-icons">
+        <div class="social-icons" >
 </div>
 
     </footer>
@@ -147,46 +146,52 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>나의 트레이딩 봇 자랑
+    <h2 class="entry-hint-parent">나의 트레이딩 봇 자랑
     </h2>
   </header>
   <div class="entry-content">
     <p>그동안 열심히 만든 트레이딩 봇을 거의 완성했다. 장장 8개월간 했던 나의 엔지니어링에 대한 자랑 겸 스토리를 써보고자 한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-10-15 17:38:26 +0900 KST'>October 15, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-10-15 17:38:26 +0900 KST'>2023년 10월 15일</span></footer>
   <a class="entry-link" aria-label="post link to 나의 트레이딩 봇 자랑" href="http://blog.cro.sh/posts/my-trading-bots/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>ETHSeoul 2023 Hackathon Review
+    <h2 class="entry-hint-parent">ETHSeoul 2023 Hackathon Review
     </h2>
   </header>
   <div class="entry-content">
     <p>난생 처음으로 해커톤, 그것도 Web3 해커톤에 참가하면서 느끼고 배운 점을 서술해보고자 한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-06-04 21:27:49 +0900 KST'>June 4, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-06-04 21:27:49 +0900 KST'>2023년 6월 4일</span></footer>
   <a class="entry-link" aria-label="post link to ETHSeoul 2023 Hackathon Review" href="http://blog.cro.sh/posts/ethseoul2023-review/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>Demystifying Functional Effect Systems in Rust (Part 1)
+    <h2 class="entry-hint-parent">Demystifying Functional Effect Systems in Rust (Part 1)
     </h2>
   </header>
   <div class="entry-content">
     <p>Effect system을 공부하던 중, Demystifying Functional Effect Systems in Scala라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-05-29 19:21:34 +0900 KST'>May 29, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-05-29 19:21:34 +0900 KST'>2023년 5월 29일</span></footer>
   <a class="entry-link" aria-label="post link to Demystifying Functional Effect Systems in Rust (Part 1)" href="http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>The Graph
+    <h2 class="entry-hint-parent">The Graph
     </h2>
   </header>
   <div class="entry-content">
@@ -194,85 +199,99 @@
 The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-05-27 21:42:40 +0900 KST'>May 27, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-05-27 21:42:40 +0900 KST'>2023년 5월 27일</span></footer>
   <a class="entry-link" aria-label="post link to The Graph" href="http://blog.cro.sh/posts/the-graph/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>Serde Interface
+    <h2 class="entry-hint-parent">Serde Interface
     </h2>
   </header>
   <div class="entry-content">
     <p>Serde는 Rust의 데이터 직렬화/역직렬화를 담당하는 프레임워크로, Rust 생태계의 중추적인 위치를 차지하고 있다. 이번 글에서는 Serde의 인터페이스가 어떻게 정의되었는지 정리해보고자 한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-05-21 11:13:05 +0900 KST'>May 21, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-05-21 11:13:05 +0900 KST'>2023년 5월 21일</span></footer>
   <a class="entry-link" aria-label="post link to Serde Interface" href="http://blog.cro.sh/posts/serde-interface/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>Lua for Python Users
+    <h2 class="entry-hint-parent">Lua for Python Users
     </h2>
   </header>
   <div class="entry-content">
     <p>Lua에 대해 간단하게 알아봅시다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-05-14 09:35:34 +0900 KST'>May 14, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-05-14 09:35:34 +0900 KST'>2023년 5월 14일</span></footer>
   <a class="entry-link" aria-label="post link to Lua for Python Users" href="http://blog.cro.sh/posts/lua-for-python-users/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>Rust의 에러 처리, Part 2
+    <h2 class="entry-hint-parent">Rust의 에러 처리, Part 2
     </h2>
   </header>
   <div class="entry-content">
     <p>[Rust의 에러 처리, Part 1]에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-01-26 20:58:44 +0900 KST'>January 26, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-01-26 20:58:44 +0900 KST'>2023년 1월 26일</span></footer>
   <a class="entry-link" aria-label="post link to Rust의 에러 처리, Part 2" href="http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>Rust의 에러 처리, Part 1
+    <h2 class="entry-hint-parent">Rust의 에러 처리, Part 1
     </h2>
   </header>
   <div class="entry-content">
     <p>Rust에서 어떻게 에러를 처리하고 복구하는지에 대해 실전 위주로 다뤄보고자 한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2023-01-07 23:26:51 +0900 KST'>January 7, 2023</span></footer>
+  <footer class="entry-footer">
+
+<span title='2023-01-07 23:26:51 +0900 KST'>2023년 1월 7일</span></footer>
   <a class="entry-link" aria-label="post link to Rust의 에러 처리, Part 1" href="http://blog.cro.sh/posts/error-handling-story-in-rust-part-1/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>4년간의 Rust 사용 후기
+    <h2 class="entry-hint-parent">4년간의 Rust 사용 후기
     </h2>
   </header>
   <div class="entry-content">
     <p>2018년 중순부터 4년간 Rust를 사용해보았고, 최근 1년 반 가량은 병역특례를 하면서 프로덕션에서도 사용을 해 보았다. 연말이기도 하니, 그 동안 내가 Rust를 하면서 어떤 인상을 받았는지를 중점으로 하여 되돌아보고자 한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2022-12-11 15:19:56 +0900 KST'>December 11, 2022</span></footer>
+  <footer class="entry-footer">
+
+<span title='2022-12-11 15:19:56 +0900 KST'>2022년 12월 11일</span></footer>
   <a class="entry-link" aria-label="post link to 4년간의 Rust 사용 후기" href="http://blog.cro.sh/posts/four-years-of-rust/"></a>
 </article>
 
 <article class="post-entry"> 
   <header class="entry-header">
-    <h2>Asynchronous Rust
+    <h2 class="entry-hint-parent">Asynchronous Rust
     </h2>
   </header>
   <div class="entry-content">
     <p>최근에 근무 중인 직장에서 비동기 Rust 프로그래밍에 대해 발표하게 되어 자료를 공유한다.
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2022-08-15 23:22:43 +0900 KST'>August 15, 2022</span></footer>
+  <footer class="entry-footer">
+
+<span title='2022-08-15 23:22:43 +0900 KST'>2022년 8월 15일</span></footer>
   <a class="entry-link" aria-label="post link to Asynchronous Rust" href="http://blog.cro.sh/posts/asynchronous-rust/"></a>
 </article>
 <footer class="page-footer">
@@ -284,16 +303,21 @@ The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 �
     </main>
     
 <footer class="footer">
-    <span>© 2019-2023 Nam Junghyun</span>
+        <span>© 2019-2023 Nam Junghyun</span> · 
+
+    
+    
     <span>
         Powered by
-        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
         <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
     </span>
 </footer>
-<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
-        <path d="M12 6H0l6-6z" />
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
     </svg>
 </a>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
@@ -301,9 +325,14 @@ The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 �
 
 
 <script>
-    let menu = document.getElementById('menu')
+    let menu = document.getElementById('menu');
     if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
         menu.onscroll = function () {
             localStorage.setItem("menu-scroll-position", menu.scrollLeft);
         }
@@ -330,25 +359,25 @@ The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 �
 
 </script>
 <script>
-    var mybutton = document.getElementById("top-link");
+    var toplink = document.getElementById("top-link");
     window.onscroll = function () {
-        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
-            mybutton.style.visibility = "visible";
-            mybutton.style.opacity = "1";
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
         } else {
-            mybutton.style.visibility = "hidden";
-            mybutton.style.opacity = "0";
+            toplink.classList.add("hidden");
         }
     };
 
 </script>
 <script>
     document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
             localStorage.setItem("pref-theme", 'light');
         } else {
-            document.body.classList.add('dark');
+            html.dataset.theme = 'dark';
             localStorage.setItem("pref-theme", 'dark');
         }
     })

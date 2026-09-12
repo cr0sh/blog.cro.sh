@@ -4,187 +4,144 @@
     <title>Option::None</title>
     <link>http://blog.cro.sh/</link>
     <description>Recent content on Option::None</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <generator>Hugo</generator>
     <language>ko-kr</language>
-    <copyright>&amp;copy; 2019-2023 Nam Junghyun</copyright>
-    <lastBuildDate>Sun, 15 Oct 2023 17:38:26 +0900</lastBuildDate><atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>2019-2023 Nam Junghyun</copyright>
+    <lastBuildDate>Sun, 15 Oct 2023 17:38:26 +0900</lastBuildDate>
+    <atom:link href="http://blog.cro.sh/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>나의 트레이딩 봇 자랑</title>
       <link>http://blog.cro.sh/posts/my-trading-bots/</link>
       <pubDate>Sun, 15 Oct 2023 17:38:26 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/my-trading-bots/</guid>
       <description>&lt;p&gt;그동안 열심히 만든 트레이딩 봇을 거의 완성했다. 장장 8개월간 했던 나의 엔지니어링에 대한 자랑 겸 스토리를 써보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>ETHSeoul 2023 Hackathon Review</title>
       <link>http://blog.cro.sh/posts/ethseoul2023-review/</link>
       <pubDate>Sun, 04 Jun 2023 21:27:49 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/ethseoul2023-review/</guid>
       <description>&lt;p&gt;난생 처음으로 해커톤, 그것도 Web3 해커톤에 참가하면서 느끼고 배운 점을 서술해보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Demystifying Functional Effect Systems in Rust (Part 1)</title>
       <link>http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/</link>
       <pubDate>Mon, 29 May 2023 19:21:34 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/demystifying-functional-effect-systems-in-rust-part-1/</guid>
       <description>&lt;p&gt;Effect system을 공부하던 중, &lt;a href=&#34;https://medium.com/wix-engineering/demystifying-functional-effect-systems-in-scala-14419039a423&#34;&gt;Demystifying Functional Effect Systems in Scala&lt;/a&gt;라는 좋은 글을 접했다. Rust에서 effect system을 적용하면 어떤 모습이 될 지 궁금하여, 해당 글을 한국어로 간단히 요약하면서 Rust로 코드를 옮겨보았다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>The Graph</title>
       <link>http://blog.cro.sh/posts/the-graph/</link>
       <pubDate>Sat, 27 May 2023 21:42:40 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/the-graph/</guid>
       <description>&lt;h1 id=&#34;graphql&#34;&gt;GraphQL&lt;/h1&gt;
 &lt;p&gt;GraphQL은 간략하게 설명하면, REST fetch와 다르게 API에 필요한 데이터만을 질의해 가져올 수 있는 쿼리 언어 &amp;amp; 런타임이다.&lt;/p&gt;
 &lt;p&gt;The Graph는 GraphQL로 온체인 데이터를 질의할 수 있게 해주는 탈중앙 프로토콜이다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Serde Interface</title>
       <link>http://blog.cro.sh/posts/serde-interface/</link>
       <pubDate>Sun, 21 May 2023 11:13:05 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/serde-interface/</guid>
       <description>&lt;p&gt;Serde는 Rust의 데이터 직렬화/역직렬화를 담당하는 프레임워크로, Rust 생태계의 중추적인 위치를 차지하고 있다. 이번 글에서는 Serde의 인터페이스가 어떻게 정의되었는지 정리해보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Lua for Python Users</title>
       <link>http://blog.cro.sh/posts/lua-for-python-users/</link>
       <pubDate>Sun, 14 May 2023 09:35:34 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/lua-for-python-users/</guid>
       <description>&lt;p&gt;Lua에 대해 간단하게 알아봅시다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Rust의 에러 처리, Part 2</title>
       <link>http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/</link>
       <pubDate>Thu, 26 Jan 2023 20:58:44 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/error-handling-story-in-rust-part-2/</guid>
       <description>&lt;p&gt;&lt;a href=&#34;../error-handling-story-in-rust-part-1&#34;&gt;[Rust의 에러 처리, Part 1]&lt;/a&gt;에 이어, Rust의 에러 처리에 대해 다뤄보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Rust의 에러 처리, Part 1</title>
       <link>http://blog.cro.sh/posts/error-handling-story-in-rust-part-1/</link>
       <pubDate>Sat, 07 Jan 2023 23:26:51 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/error-handling-story-in-rust-part-1/</guid>
       <description>&lt;p&gt;Rust에서 어떻게 에러를 처리하고 복구하는지에 대해 실전 위주로 다뤄보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>4년간의 Rust 사용 후기</title>
       <link>http://blog.cro.sh/posts/four-years-of-rust/</link>
       <pubDate>Sun, 11 Dec 2022 15:19:56 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/four-years-of-rust/</guid>
       <description>&lt;p&gt;2018년 중순부터 4년간 Rust를 사용해보았고, 최근 1년 반 가량은 병역특례를 하면서 프로덕션에서도 사용을 해 보았다.
 연말이기도 하니, 그 동안 내가 Rust를 하면서 어떤 인상을 받았는지를 중점으로 하여 되돌아보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Asynchronous Rust</title>
       <link>http://blog.cro.sh/posts/asynchronous-rust/</link>
       <pubDate>Mon, 15 Aug 2022 23:22:43 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/asynchronous-rust/</guid>
       <description>&lt;p&gt;최근에 근무 중인 직장에서 비동기 Rust 프로그래밍에 대해 발표하게 되어 자료를 공유한다.&lt;/p&gt;</description>
     </item>
-    
-    <item>
-      <title>Anchor Protocol Summary</title>
-      <link>http://blog.cro.sh/posts/anchor-protocol-summary/</link>
-      <pubDate>Sun, 27 Feb 2022 13:08:18 +0900</pubDate>
-      
-      <guid>http://blog.cro.sh/posts/anchor-protocol-summary/</guid>
-      <description></description>
-    </item>
-    
     <item>
       <title>Windows에서 Rust 빌드 환경 컨테이너화하기</title>
       <link>http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/</link>
       <pubDate>Sun, 20 Feb 2022 21:25:34 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/dockerizing-windows-rust-build-environment/</guid>
       <description>&lt;p&gt;CD 등을 위해 Rust 빌드 환경을 &lt;a href=&#34;https://hub.docker.com/_/rust&#34;&gt;Docker Hub의 공식 Rust 이미지&lt;/a&gt;를
 기반으로 하여 자주 구성하는데, 공식 이미지는 Linux 컨테이너만 지원하기 때문에 Windows 기반의
 빌드 환경을 샌드박싱하기 어려웠다. 이번 포스트에서는 Windows Docker Image 기반으로 Rust 빌드
 환경을 구성하는 법을 다룰 것이다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>파이로 파이 Pico 디버깅하기 (w/ buildroot)</title>
       <link>http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/</link>
       <pubDate>Sun, 19 Dec 2021 11:32:19 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/debugging-raspberry-pi-pico-with-raspberry-pi-3/</guid>
       <description>&lt;p&gt;라즈베리 파이 재단이 출시한 4$ MCU인 Pico를 구입했다. 하드웨어 디버깅을 하기에 마땅한 장비가 없어서,
 가지고 있던 라즈베리 파이 3을 이용해보기로 했다. 최대한 미니멀한 환경을 원했기 때문에 예전과 같이
 Buildroot을 사용하여 구성하였다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Cloudflare Workers Rust SDK 사용기</title>
       <link>http://blog.cro.sh/posts/cloudflare-workers-rust/</link>
       <pubDate>Mon, 04 Oct 2021 19:16:56 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/cloudflare-workers-rust/</guid>
       <description>&lt;p&gt;Workers는 Cloudflare사의 서버리스 컴퓨팅 서비스로, 전세계의 수많은 Cloudflare Edge 네트워크를
 통해 빠른 반응속도로 응답할 수 있는 매력적인 서비스다. Workers 코드를 Rust로 작성해보면서 느낀 점을
 공유해보고자 한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>CS6265 Epilogue</title>
       <link>http://blog.cro.sh/posts/cs6265-epilogue/</link>
       <pubDate>Sun, 14 Feb 2021 16:44:32 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/cs6265-epilogue/</guid>
       <description>&lt;p&gt;동계 디지털 국제 계절수업 프로그램을 통해 조지아 공대의
 &lt;a href=&#34;https://omscs.gatech.edu/cs-6265-information-security-lab&#34;&gt;Information Security Lab (CS6265)&lt;/a&gt;
 수업을 들어볼 수 있었다. 겨울방학 동한 공부한 컴퓨터 보안에 대해 정리해보고자 한다.
 당연히 이 글을 읽는 누군가는 이 수업을 들을 수도 있기 때문에, 스포일러는 최대한 자제할 것이다. 무엇을 배웠는지 위주로 정리한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Windows에서 Rust ARM64 타겟으로 크로스컴파일하기</title>
       <link>http://blog.cro.sh/posts/rust-crosscompile-aarch64/</link>
       <pubDate>Sat, 04 Apr 2020 21:50:17 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/rust-crosscompile-aarch64/</guid>
       <description>&lt;p&gt;링크 위주로 간략하게 정리한다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Wasm 모듈 HTML에 내장하기</title>
       <link>http://blog.cro.sh/posts/embedding-wasm-in-html/</link>
       <pubDate>Sun, 23 Feb 2020 17:57:08 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/embedding-wasm-in-html/</guid>
       <description>&lt;p&gt;레지스트리를 암호화해 저장하는 프로그램인 &lt;a href=&#34;https://github.com/cr0sh/zandam&#34;&gt;Zandam&lt;/a&gt;을 개발하면서, &amp;lsquo;Self-extractor를 Wasm과 HTML로 작성하면 크로스플랫폼 지원이 매우 간단하지 않을까&amp;rsquo; 라는 생각을 해 보았다. 그런데 사용자 입장에서 여러 개의 파일(JS module, Wasm module, HTML 등)을 들고 다니면 매우 번거롭기 때문에, 이들을 하나의 HTML 파일로 우겨넣는 방법을 찾아야 했다.&lt;/p&gt;</description>
     </item>
-    
     <item>
       <title>Raspberry Pi Zero-W에 Buildroot 설치하기 (1)</title>
       <link>http://blog.cro.sh/posts/pi-zero-buildroot/</link>
       <pubDate>Sun, 01 Dec 2019 19:19:27 +0900</pubDate>
-      
       <guid>http://blog.cro.sh/posts/pi-zero-buildroot/</guid>
       <description>&lt;p&gt;라즈베리 파이 제로-W를 산 지 1년이 다 되어가는데도, 쓸 데가 딱히 없어 서랍장 한구석에 박아 두고 있었다.
 그러다가 &lt;a href=&#34;https://github.com/cr0sh/lzn&#34;&gt;lzn&lt;/a&gt;(현재 private)을 개발하면서 &amp;lsquo;이걸 파이에 박아놓고 휴대용 웹툰 서버 머신으로 쓰면 어떨까&amp;rsquo; 하는 생각이 들었다.
 보조배터리 꽂아서 쓸 건데 굳이 전력 아깝게(?) 다른 프로그램 돌아가는 건 싫었고, 임베디드 리눅스도 공부할 겸 &lt;a href=&#34;https://buildroot.org&#34;&gt;Buildroot&lt;/a&gt;으로 리눅스를 빌드해서 올려보는 작업에 도전했다. 모니터 없이(headless) 동작하는 리눅스 머신 셋업 과정을 여기에 정리하고 공유한다.&lt;/p&gt;</description>
     </item>
-    
-    
   </channel>
 </rss>
